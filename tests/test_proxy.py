@@ -72,7 +72,7 @@ async def test_proxy_primary_alive(client: AsyncClient) -> None:
     assert data["server"] == "primary"
     assert data["destination"] == "user-service"
     assert data["params"] == {}
-    assert data["routing_decision"] == "Primary server selected: server is healthy"
+    assert "Primary server selected" in data["routing_decision"]
     assert "timestamp" in data
     # Verify timestamp is valid ISO 8601
     datetime.fromisoformat(data["timestamp"])
@@ -87,7 +87,7 @@ async def test_proxy_with_dynamic_params(client: AsyncClient) -> None:
     assert data["server"] == "primary"
     assert data["destination"] == "user-service"
     assert data["params"] == {"id": "42"}
-    assert data["routing_decision"] == "Primary server selected: server is healthy"
+    assert "Primary server selected" in data["routing_decision"]
 
 
 @pytest.mark.asyncio

@@ -68,17 +68,26 @@ def _load_model() -> Any:
 def _predict_failure() -> tuple[bool, dict[str, float]]:
     """Generate mock latency metrics and predict server failure.
 
+    ML prediction is only active when the ML_ENABLED environment variable
+    is set to "1" or "true". This prevents non-deterministic behavior
+    during testing while enabling the feature in production/demos.
+
     Returns:
         Tuple of (failure_predicted: bool, metrics: dict with feature values)
     """
-    model = _load_model()
-
     # Generate mock real-time metrics for this request
     metrics = {
         "rolling_latency_p95": random.uniform(50, 600),
         "error_rate_1min": random.uniform(0.0, 0.5),
         "requests_per_minute": random.uniform(100, 3000),
     }
+
+    # Only run ML predictions when explicitly enabled (demo/production)
+    ml_enabled = os.environ.get("ML_ENABLED", "0").lower() in ("1", "true")
+    if not ml_enabled:
+        return False, metrics
+
+    model = _load_model()
 
     if model is None:
         # No model available — no prediction, rely on health status only

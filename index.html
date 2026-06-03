@@ -6,7 +6,6 @@
 <title>NEURO-MESH Client</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: #0d0d1a;
@@ -15,13 +14,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 3rem 1.5rem;
+    padding: 2.5rem 1.5rem;
   }
-
-  .header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-  }
+  .logo-wrap { margin-bottom: 1rem; }
+  .header { text-align: center; margin-bottom: 2.5rem; }
   .header h1 {
     font-size: 2rem;
     background: linear-gradient(135deg, #00d4ff, #7b2ff7);
@@ -29,167 +25,108 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .header p {
-    color: #777;
-    margin-top: 0.4rem;
-    font-size: 0.9rem;
-  }
-
+  .header p { color: #777; margin-top: 0.4rem; font-size: 0.9rem; }
   .panel {
-    background: #14142b;
-    border: 1px solid #2a2a4a;
-    border-radius: 16px;
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 520px;
-    text-align: center;
+    background: #14142b; border: 1px solid #2a2a4a;
+    border-radius: 16px; padding: 2.5rem;
+    width: 100%; max-width: 560px; text-align: center;
   }
-
   .panel h2 {
-    font-size: 1.1rem;
-    color: #aaa;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 1.5rem;
-    font-weight: 500;
+    font-size: 1.05rem; color: #aaa; text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 1.5rem; font-weight: 500;
   }
-
   .btn {
     background: linear-gradient(135deg, #7b2ff7, #00d4ff);
-    border: none;
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 600;
-    padding: 0.9rem 2.2rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.3s;
-    letter-spacing: 0.5px;
+    border: none; color: #fff; font-size: 0.95rem; font-weight: 600;
+    padding: 0.85rem 2rem; border-radius: 8px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.3s; letter-spacing: 0.5px;
   }
-  .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(123, 47, 247, 0.35);
-  }
-  .btn:active {
-    transform: translateY(0);
-  }
-  .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(123,47,247,0.35); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
   .response-box {
-    margin-top: 2rem;
-    background: #1a1a2e;
-    border: 1px solid #2a2a4a;
-    border-radius: 10px;
-    padding: 1.2rem;
-    text-align: left;
-    font-family: 'Cascadia Code', 'Fira Code', monospace;
-    font-size: 0.8rem;
-    color: #8892b0;
-    max-height: 220px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-    display: none;
+    margin-top: 1.5rem; background: #1a1a2e; border: 1px solid #2a2a4a;
+    border-radius: 10px; padding: 1.2rem; text-align: left;
+    font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.78rem;
+    color: #8892b0; max-height: 220px; overflow-y: auto;
+    white-space: pre-wrap; word-break: break-word; display: none;
   }
   .response-box.visible { display: block; }
-
-  /* Notification Toast */
   .toast-container {
-    position: fixed;
-    top: 1.5rem;
-    right: 1.5rem;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
+    position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999;
+    display: flex; flex-direction: column; gap: 0.8rem;
   }
-
   .toast {
-    padding: 1rem 1.5rem;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
+    padding: 1rem 1.5rem; border-radius: 10px; font-size: 0.9rem; font-weight: 500;
+    display: flex; align-items: center; gap: 0.7rem;
     animation: slideIn 0.35s ease-out, fadeOut 0.4s 3.5s ease-in forwards;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-    max-width: 380px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4); max-width: 380px;
   }
-
-  .toast-primary {
-    background: #0a2e1a;
-    border: 1px solid #00ff88;
-    color: #00ff88;
-  }
-  .toast-fallback {
-    background: #2e1f0a;
-    border: 1px solid #ffaa00;
-    color: #ffaa00;
-  }
-  .toast-error {
-    background: #2e0a0a;
-    border: 1px solid #ff4444;
-    color: #ff4444;
-  }
-
+  .toast-primary { background: #0a2e1a; border: 1px solid #00ff88; color: #00ff88; }
+  .toast-fallback { background: #2e1f0a; border: 1px solid #ffaa00; color: #ffaa00; }
+  .toast-error { background: #2e0a0a; border: 1px solid #ff4444; color: #ff4444; }
   .toast .icon { font-size: 1.3rem; }
-
-  @keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to   { transform: translateX(0); opacity: 1; }
-  }
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to   { opacity: 0; transform: translateX(30px); }
-  }
-
-  .history {
-    margin-top: 2rem;
-    width: 100%;
-    max-width: 520px;
-  }
-  .history h3 {
-    color: #666;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 0.8rem;
-  }
-  .history-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+  @keyframes slideIn { from{transform:translateX(100%);opacity:0;} to{transform:translateX(0);opacity:1;} }
+  @keyframes fadeOut { from{opacity:1;} to{opacity:0;transform:translateX(30px);} }
+  .history { margin-top: 2rem; width: 100%; max-width: 560px; }
+  .history h3 { color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem; }
+  .history-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
   .history-item {
-    background: #14142b;
-    border: 1px solid #2a2a4a;
-    border-radius: 8px;
-    padding: 0.7rem 1rem;
-    font-size: 0.82rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
+    background: #14142b; border: 1px solid #2a2a4a; border-radius: 8px;
+    padding: 0.7rem 1rem; font-size: 0.82rem; display: flex; align-items: center; gap: 0.6rem;
   }
-  .history-item .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .history-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .dot-green { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
   .dot-orange { background: #ffaa00; box-shadow: 0 0 6px #ffaa00; }
   .dot-red { background: #ff4444; box-shadow: 0 0 6px #ff4444; }
   .history-item .time { color: #555; margin-left: auto; font-size: 0.75rem; }
+  .footer { text-align: center; margin-top: 2.5rem; color: #555; font-size: 0.8rem; }
+  .footer .brand { color: #7b2ff7; font-weight: 600; }
 </style>
 </head>
 <body>
+
+<!-- Embedded SVG Logo -->
+<div class="logo-wrap">
+  <svg width="90" height="90" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#0f0f1a" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="nodeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#00d4ff"/>
+        <stop offset="100%" stop-color="#7b2ff7"/>
+      </linearGradient>
+      <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.7"/>
+        <stop offset="100%" stop-color="#7b2ff7" stop-opacity="0.4"/>
+      </linearGradient>
+    </defs>
+    <circle cx="100" cy="100" r="95" fill="url(#glow)"/>
+    <!-- Connections -->
+    <line x1="100" y1="50" x2="55" y2="100" stroke="url(#lineGrad)" stroke-width="2"/>
+    <line x1="100" y1="50" x2="145" y2="100" stroke="url(#lineGrad)" stroke-width="2"/>
+    <line x1="55" y1="100" x2="75" y2="155" stroke="url(#lineGrad)" stroke-width="2"/>
+    <line x1="145" y1="100" x2="125" y2="155" stroke="url(#lineGrad)" stroke-width="2"/>
+    <line x1="55" y1="100" x2="145" y2="100" stroke="url(#lineGrad)" stroke-width="1.5"/>
+    <line x1="75" y1="155" x2="125" y2="155" stroke="url(#lineGrad)" stroke-width="1.5"/>
+    <line x1="100" y1="50" x2="75" y2="155" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="4,3"/>
+    <line x1="100" y1="50" x2="125" y2="155" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="4,3"/>
+    <!-- Nodes -->
+    <circle cx="100" cy="50" r="12" fill="url(#nodeGrad)" opacity="0.95"/>
+    <circle cx="55" cy="100" r="10" fill="url(#nodeGrad)" opacity="0.85"/>
+    <circle cx="145" cy="100" r="10" fill="url(#nodeGrad)" opacity="0.85"/>
+    <circle cx="75" cy="155" r="9" fill="url(#nodeGrad)" opacity="0.75"/>
+    <circle cx="125" cy="155" r="9" fill="url(#nodeGrad)" opacity="0.75"/>
+    <!-- Inner glow dots -->
+    <circle cx="100" cy="50" r="5" fill="#fff" opacity="0.6"/>
+    <circle cx="55" cy="100" r="4" fill="#fff" opacity="0.5"/>
+    <circle cx="145" cy="100" r="4" fill="#fff" opacity="0.5"/>
+    <circle cx="75" cy="155" r="3.5" fill="#fff" opacity="0.4"/>
+    <circle cx="125" cy="155" r="3.5" fill="#fff" opacity="0.4"/>
+  </svg>
+</div>
 
 <div class="header">
   <h1>NEURO-MESH Client</h1>
@@ -198,9 +135,7 @@
 
 <div class="panel">
   <h2>Request User Data</h2>
-  <button class="btn" id="fetchBtn" onclick="fetchUserData()">
-    Fetch User Data
-  </button>
+  <button class="btn" id="fetchBtn" onclick="fetchUserData()">Fetch User Data</button>
   <div class="response-box" id="responseBox"></div>
 </div>
 
@@ -213,7 +148,7 @@
 <div class="panel" style="margin-top:2rem;">
   <h2>System Insights &amp; Model Chat</h2>
   <p style="color:#777;font-size:0.82rem;margin-bottom:1rem;">
-    Chat with the ML model — enter fake latency metrics and see live predictions.
+    Chat with the ML model &mdash; enter metrics and see live failure predictions.
   </p>
   <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem;">
     <input type="number" id="ml-latency" placeholder="Latency P95 (ms)" value="400" step="10"
@@ -231,34 +166,29 @@
   <div class="response-box" id="dsaBox"></div>
 </div>
 
-<div style="text-align:center;margin-top:2rem;color:#555;font-size:0.8rem;">
+<div class="footer">
   <p>NEURO-MESH Phase 1 &middot; Muhammad Dayan</p>
-  <p style="margin-top:0.3rem;">Powered by <span style="color:#7b2ff7;font-weight:600;">Xiomics Systems</span></p>
+  <p style="margin-top:0.3rem;">Powered by <span class="brand">Xiomics Systems</span></p>
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-const API_URL = 'http://localhost:8000/proxy/api/v1/users';
-
+// All URLs are RELATIVE — works on localhost and Vercel
 async function fetchUserData() {
   const btn = document.getElementById('fetchBtn');
   const box = document.getElementById('responseBox');
-
   btn.disabled = true;
   btn.textContent = 'Fetching...';
 
   try {
-    const resp = await fetch(API_URL, { method: 'POST' });
+    const resp = await fetch('/proxy/api/v1/users', { method: 'POST' });
     const data = await resp.json();
-
-    // Show raw response
     box.textContent = JSON.stringify(data, null, 2);
     box.classList.add('visible');
 
     if (resp.status === 200) {
       const decision = data.routing_decision || '';
-
       if (decision.toLowerCase().includes('fallback') || data.server === 'fallback') {
         showToast('fallback', '⚠️ Primary Failed! Seamlessly fetched from Fallback API');
         addHistory('orange', 'Routed to Fallback (failover)');
@@ -270,17 +200,15 @@ async function fetchUserData() {
       showToast('error', '✗ All servers down! No data available');
       addHistory('red', '503 — No healthy servers');
     } else {
-      showToast('error', `✗ Error ${resp.status}: ${data.error || 'Unknown'}`);
-      addHistory('red', `Error ${resp.status}`);
+      showToast('error', '✗ Error ' + resp.status + ': ' + (data.error || 'Unknown'));
+      addHistory('red', 'Error ' + resp.status);
     }
-
   } catch (err) {
     box.textContent = 'Connection failed: ' + err.message;
     box.classList.add('visible');
     showToast('error', '✗ Cannot reach gateway — is the server running?');
     addHistory('red', 'Connection failed');
   }
-
   btn.disabled = false;
   btn.textContent = 'Fetch User Data';
 }
@@ -288,31 +216,21 @@ async function fetchUserData() {
 function showToast(type, message) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-
+  toast.className = 'toast toast-' + type;
   const icons = { primary: '✓', fallback: '⚠️', error: '✗' };
-  toast.innerHTML = `<span class="icon">${icons[type] || '•'}</span><span>${message}</span>`;
-
+  toast.innerHTML = '<span class="icon">' + (icons[type]||'•') + '</span><span>' + message + '</span>';
   container.appendChild(toast);
-
-  // Remove after animation ends
-  setTimeout(() => { toast.remove(); }, 4000);
+  setTimeout(function(){ toast.remove(); }, 4000);
 }
 
 function addHistory(color, text) {
   const list = document.getElementById('historyList');
   const li = document.createElement('li');
   li.className = 'history-item';
-
   const now = new Date().toLocaleTimeString();
-  li.innerHTML = `<span class="dot dot-${color}"></span><span>${text}</span><span class="time">${now}</span>`;
-
+  li.innerHTML = '<span class="dot dot-' + color + '"></span><span>' + text + '</span><span class="time">' + now + '</span>';
   list.prepend(li);
-
-  // Keep max 10 entries
-  while (list.children.length > 10) {
-    list.removeChild(list.lastChild);
-  }
+  while (list.children.length > 10) list.removeChild(list.lastChild);
 }
 
 async function chatWithModel() {
@@ -320,29 +238,27 @@ async function chatWithModel() {
   const latency = parseFloat(document.getElementById('ml-latency').value);
   const errorRate = parseFloat(document.getElementById('ml-error').value);
   const rps = parseFloat(document.getElementById('ml-rps').value);
-
   box.classList.add('visible');
   box.textContent = 'Asking model...';
 
   try {
-    const resp = await fetch('http://localhost:8000/predict-health', {
+    const resp = await fetch('/predict-health', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({rolling_latency_p95: latency, error_rate_1min: errorRate, requests_per_minute: rps})
     });
     const data = await resp.json();
-
     if (data.prediction) {
       const color = data.failure_predicted ? '#ff4444' : '#00ff88';
-      box.innerHTML = `<span style="color:${color};font-weight:bold;font-size:1.1rem;">${data.prediction}</span>\n\n`
-        + `Confidence:\n  Survive: ${(data.confidence.survive_probability * 100).toFixed(1)}%\n`
-        + `  Fail:    ${(data.confidence.fail_probability * 100).toFixed(1)}%\n\n`
-        + `Model: ${data.model}\nInput: latency=${latency}ms, error_rate=${errorRate}, rps=${rps}`;
+      box.innerHTML = '<span style="color:' + color + ';font-weight:bold;font-size:1.1rem;">' + data.prediction + '</span>\n\n'
+        + 'Confidence:\n  Survive: ' + (data.confidence.survive_probability * 100).toFixed(1) + '%\n'
+        + '  Fail:    ' + (data.confidence.fail_probability * 100).toFixed(1) + '%\n\n'
+        + 'Model: ' + data.model + '\nInput: latency=' + latency + 'ms, error_rate=' + errorRate + ', rps=' + rps;
     } else {
       box.textContent = 'Model unavailable: ' + (data.error || 'Run train_mock_model.py first');
     }
   } catch(e) {
-    box.textContent = 'Error: ' + e.message + '\nMake sure server is running.';
+    box.textContent = 'Error: ' + e.message;
   }
 }
 
@@ -350,9 +266,8 @@ async function viewDSA() {
   const box = document.getElementById('dsaBox');
   box.classList.add('visible');
   box.textContent = 'Loading...';
-
   try {
-    const resp = await fetch('http://localhost:8000/dsa-state');
+    const resp = await fetch('/dsa-state');
     const data = await resp.json();
     box.textContent = JSON.stringify(data, null, 2);
   } catch(e) {
@@ -360,6 +275,5 @@ async function viewDSA() {
   }
 }
 </script>
-
 </body>
 </html>
