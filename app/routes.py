@@ -1,19 +1,26 @@
 """Route handlers for the NEURO-MESH API Gateway.
 
 This module defines the FastAPI route handler functions for:
-- POST /proxy/{path:path} - Universal proxy endpoint
+- POST /proxy/{path:path} - Universal proxy endpoint with ML-based predictive failover
 - GET /health - Server health listing
 - PUT /health/{server_id} - Server health update
 
 Implementation:
-- proxy_handler: validates path, resolves via Trie, evaluates health, routes
-- health_list: returns all server statuses
-- health_update: updates a server's health status with validation
+- proxy_handler: validates path, resolves via Trie, runs ML prediction,
+  evaluates health, and routes with intelligent failover
+- ML model predicts server failure from synthetic latency metrics
+- If failure predicted, preemptively reroutes to Fallback
 """
 
 import logging
+import os
+import pickle
+import random
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
+import numpy as np
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
@@ -28,25 +35,90 @@ logger = logging.getLogger(__name__)
 trie: Trie | None = None
 state_manager: StateManager | None = None
 
+# ML Model for predictive failover
+_ml_model: Any = None
+_model_loaded: bool = False
+
 router = APIRouter()
+
+
+def _load_model() -> Any:
+    """Load the trained ML model from model.pkl if available."""
+    global _ml_model, _model_loaded
+    if _model_loaded:
+        return _ml_model
+
+    model_path = Path("model.pkl")
+    if model_path.exists():
+        try:
+            with open(model_path, "rb") as f:
+                _ml_model = pickle.load(f)
+            logger.info("ML model loaded from %s", model_path)
+        except Exception as e:
+            logger.warning("Failed to load ML model: %s", e)
+            _ml_model = None
+    else:
+        logger.info("No model.pkl found — ML predictive failover disabled")
+        _ml_model = None
+
+    _model_loaded = True
+    return _ml_model
+
+
+def _predict_failure() -> tuple[bool, dict[str, float]]:
+    """Generate mock latency metrics and predict server failure.
+
+    Returns:
+        Tuple of (failure_predicted: bool, metrics: dict with feature values)
+    """
+    model = _load_model()
+
+    # Generate mock real-time metrics for this request
+    metrics = {
+        "rolling_latency_p95": random.uniform(50, 600),
+        "error_rate_1min": random.uniform(0.0, 0.5),
+        "requests_per_minute": random.uniform(100, 3000),
+    }
+
+    if model is None:
+        # No model available — no prediction, rely on health status only
+        return False, metrics
+
+    # Run prediction
+    features = np.array([[
+        metrics["rolling_latency_p95"],
+        metrics["error_rate_1min"],
+        metrics["requests_per_minute"],
+    ]])
+
+    prediction = model.predict(features)[0]
+    failure_predicted = bool(prediction == 1)
+
+    if failure_predicted:
+        logger.warning(
+            "ML MODEL ALERT: Failure predicted! metrics=%s", metrics
+        )
+
+    return failure_predicted, metrics
 
 
 @router.post("/proxy/{path:path}")
 async def proxy_handler(path: str) -> JSONResponse:
-    """Universal proxy endpoint that intercepts requests and performs routing.
+    """Universal proxy endpoint with ML-based predictive failover.
 
-    Validates the incoming path, resolves the route via the Trie, evaluates
-    backend server health, and returns a routing decision.
+    Flow:
+    1. Validate incoming path
+    2. Resolve route via Trie (custom DSA)
+    3. Run ML model prediction on mock latency metrics
+    4. If failure predicted → preemptively reroute to Fallback
+    5. Otherwise use standard health-based failover logic
+    6. Return routing decision with full metadata
 
     Args:
         path: The request sub-path captured by FastAPI's path converter.
 
     Returns:
-        JSONResponse with appropriate status code and body:
-        - 200 with ProxySuccessResponse on successful routing
-        - 400 for empty/whitespace or invalid character paths
-        - 404 when no route matches
-        - 503 when all servers are dead
+        JSONResponse with appropriate status code and body.
     """
     # Step 1: Validate path
     validation_error = validate_path(path)
@@ -57,7 +129,7 @@ async def proxy_handler(path: str) -> JSONResponse:
             content=error_response.model_dump(),
         )
 
-    # Step 2: Resolve route via Trie
+    # Step 2: Resolve route via Trie (DSA component)
     assert trie is not None, "Trie not initialized"
     result = trie.resolve(path)
     if result is None:
@@ -69,31 +141,54 @@ async def proxy_handler(path: str) -> JSONResponse:
 
     destination, params = result
 
-    # Step 3: Evaluate server health and make routing decision
+    # Step 3: ML Prediction — predictive failover
     assert state_manager is not None, "StateManager not initialized"
+    failure_predicted, metrics = _predict_failure()
 
+    # Step 4: Routing decision with ML integration
     primary_status = await state_manager.get_status("primary")
+    fallback_status = await state_manager.get_status("fallback")
 
-    if primary_status == HealthStatus.ALIVE:
-        selected_server = "primary"
-        routing_decision = "Primary server selected: server is healthy"
-    else:
-        fallback_status = await state_manager.get_status("fallback")
+    if failure_predicted and primary_status == HealthStatus.ALIVE:
+        # ML model predicts failure — preemptive reroute to fallback
         if fallback_status == HealthStatus.ALIVE:
             selected_server = "fallback"
             routing_decision = (
-                "Fallback server selected: primary server is unhealthy"
+                f"ML PREDICTIVE REROUTE: Failure predicted "
+                f"(latency={metrics['rolling_latency_p95']:.0f}ms, "
+                f"error_rate={metrics['error_rate_1min']:.2%}, "
+                f"rps={metrics['requests_per_minute']:.0f}) — "
+                f"preemptively routing to fallback"
             )
         else:
-            error_response = ProxyErrorResponse(
-                error="No healthy servers available", path=path
+            # Fallback also dead, use primary as last resort
+            selected_server = "primary"
+            routing_decision = (
+                f"ML predicted failure but fallback unavailable — "
+                f"routing to primary (risk accepted)"
             )
-            return JSONResponse(
-                status_code=503,
-                content=error_response.model_dump(),
-            )
+    elif primary_status == HealthStatus.ALIVE:
+        selected_server = "primary"
+        routing_decision = (
+            f"Primary server selected: server is healthy "
+            f"(latency={metrics['rolling_latency_p95']:.0f}ms, "
+            f"error_rate={metrics['error_rate_1min']:.2%})"
+        )
+    elif fallback_status == HealthStatus.ALIVE:
+        selected_server = "fallback"
+        routing_decision = (
+            "Fallback server selected: primary server is unhealthy"
+        )
+    else:
+        error_response = ProxyErrorResponse(
+            error="No healthy servers available", path=path
+        )
+        return JSONResponse(
+            status_code=503,
+            content=error_response.model_dump(),
+        )
 
-    # Step 4: Build success response with ISO 8601 timestamp
+    # Step 5: Build success response
     timestamp = datetime.now(timezone.utc).isoformat()
 
     success_response = ProxySuccessResponse(
@@ -104,13 +199,14 @@ async def proxy_handler(path: str) -> JSONResponse:
         timestamp=timestamp,
     )
 
-    # Step 5: Log the routing decision
+    # Step 6: Log the routing decision
     logger.info(
-        "Routing decision: timestamp=%s path=%s destination=%s server=%s",
+        "Routing decision: timestamp=%s path=%s destination=%s server=%s ml_failure_predicted=%s",
         timestamp,
         path,
         destination,
         selected_server,
+        failure_predicted,
     )
 
     return JSONResponse(

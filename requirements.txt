@@ -6,3 +6,7 @@ pytest
 pytest-asyncio
 hypothesis
 pytest-cov
+scikit-learn
+numpy
+requests
+colorama
