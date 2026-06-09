@@ -1,0 +1,315 @@
+/* ============================================================
+   NEURO-MESH — Master Theme v2.0
+   Cyber-Minimalist Design System
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* ── CSS Variables ─────────────────────────────────────────── */
+:root {
+  --teal:       #00f2fe;
+  --violet:     #7c3aed;
+  --violet-lt:  #a78bfa;
+  --pink:       #f472b6;
+  --bg:         #030712;
+  --bg-2:       #0d1117;
+  --bg-3:       #111827;
+  --surface:    rgba(17,24,39,0.7);
+  --border:     rgba(255,255,255,0.07);
+  --border-md:  rgba(255,255,255,0.12);
+  --text-1:     #f9fafb;
+  --text-2:     #9ca3af;
+  --text-3:     #6b7280;
+  --radius-lg:  18px;
+  --radius-xl:  24px;
+  --blur:       blur(20px);
+  --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Reset & Base ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text-1);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(124,58,237,0.4); color: #fff; }
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.4); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.7); }
+
+/* ── Typography ────────────────────────────────────────────── */
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+.text-gradient {
+  background: linear-gradient(135deg, var(--teal) 0%, var(--violet-lt) 50%, var(--pink) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.text-gradient-teal {
+  background: linear-gradient(90deg, var(--teal), #4facfe);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Glassmorphism ─────────────────────────────────────────── */
+.glass {
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--border);
+}
+.glass-bright {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--border-md);
+}
+
+/* ── Sticky Navigation ─────────────────────────────────────── */
+#site-nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 1000;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem;
+  background: rgba(3,7,18,0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  transition: var(--transition);
+}
+#site-nav.scrolled { background: rgba(3,7,18,0.95); }
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; color: var(--text-1);
+  font-weight: 800; font-size: 1.1rem; letter-spacing: -0.03em;
+}
+.nav-logo-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--teal), var(--violet));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.nav-links {
+  display: flex; align-items: center; gap: 0.25rem;
+  list-style: none;
+}
+.nav-links a {
+  text-decoration: none; color: var(--text-2);
+  font-size: 0.85rem; font-weight: 500;
+  padding: 6px 12px; border-radius: 8px;
+  transition: var(--transition);
+}
+.nav-links a:hover { color: var(--text-1); background: rgba(255,255,255,0.06); }
+.nav-links a.active { color: var(--teal); }
+
+.nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+/* ── App Launcher (Mega Menu) ──────────────────────────────── */
+#launcher-btn {
+  width: 38px; height: 38px;
+  border-radius: 10px; border: 1px solid var(--border-md);
+  background: rgba(255,255,255,0.05);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: var(--transition); color: var(--text-2);
+}
+#launcher-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-1); border-color: rgba(255,255,255,0.2); }
+#launcher-btn.open { background: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.4); color: var(--violet-lt); }
+
+#mega-menu {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(3,7,18,0.97);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1);
+  padding: 80px 2rem 2rem;
+}
+#mega-menu.open { opacity: 1; pointer-events: all; }
+
+.mega-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  max-width: 1100px;
+  width: 100%;
+}
+.mega-menu-card {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 16px; border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  text-decoration: none; color: var(--text-2);
+  transition: var(--transition);
+  cursor: pointer;
+}
+.mega-menu-card:hover {
+  background: rgba(124,58,237,0.1);
+  border-color: rgba(124,58,237,0.3);
+  color: var(--text-1);
+  transform: translateY(-2px);
+}
+.mega-menu-card .icon {
+  font-size: 1.4rem; margin-bottom: 2px;
+}
+.mega-menu-card .label {
+  font-size: 0.8rem; font-weight: 600; letter-spacing: -0.01em;
+}
+.mega-menu-card .desc {
+  font-size: 0.7rem; color: var(--text-3); line-height: 1.4;
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--teal), #4facfe);
+  color: #030712; font-weight: 700; font-size: 0.9rem;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 0 24px rgba(0,242,254,0.25);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(0,242,254,0.4); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 24px; border-radius: 12px;
+  background: transparent;
+  color: var(--text-1); font-weight: 600; font-size: 0.9rem;
+  text-decoration: none; cursor: pointer;
+  border: 1px solid var(--border-md);
+  transition: var(--transition);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); }
+
+/* ── Status Badge ──────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 99px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em;
+  font-family: 'JetBrains Mono', monospace;
+}
+.badge-teal  { background: rgba(0,242,254,0.1); color: var(--teal); border: 1px solid rgba(0,242,254,0.2); }
+.badge-violet{ background: rgba(124,58,237,0.1); color: var(--violet-lt); border: 1px solid rgba(124,58,237,0.2); }
+.badge-green { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+.badge-red   { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+.badge .dot  { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge .dot.pulse { animation: dot-pulse 1.5s ease-in-out infinite; }
+@keyframes dot-pulse {
+  0%,100% { opacity:1; transform: scale(1); }
+  50%      { opacity:.5; transform: scale(0.7); }
+}
+
+/* ── Bento Grid ────────────────────────────────────────────── */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 180px;
+  gap: 14px;
+}
+.bento-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: rgba(17,24,39,0.6);
+  backdrop-filter: blur(12px);
+  padding: 1.5rem;
+  position: relative; overflow: hidden;
+  text-decoration: none; color: var(--text-1);
+  transition: var(--transition);
+  display: flex; flex-direction: column; justify-content: space-between;
+  cursor: pointer;
+}
+.bento-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at top left, rgba(0,242,254,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.bento-card:hover {
+  border-color: rgba(0,242,254,0.25);
+  background: rgba(17,24,39,0.9);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,242,254,0.1);
+}
+.bento-card.span-2  { grid-column: span 2; }
+.bento-card.span-3  { grid-column: span 3; }
+.bento-card.row-2   { grid-row: span 2; }
+.bento-card.violet::before { background: radial-gradient(ellipse at bottom right, rgba(124,58,237,0.1) 0%, transparent 60%); }
+.bento-card.violet:hover { border-color: rgba(124,58,237,0.3); box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(124,58,237,0.15); }
+
+.bento-card .card-icon  { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.bento-card .card-tag   { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+.bento-card .card-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+.bento-card .card-desc  { font-size: 0.75rem; color: var(--text-2); line-height: 1.5; }
+.bento-card .card-arrow { position: absolute; top: 1.25rem; right: 1.25rem; color: var(--text-3); font-size: 0.9rem; transition: var(--transition); }
+.bento-card:hover .card-arrow { color: var(--teal); transform: translate(2px,-2px); }
+
+/* ── Inner Page Layout ─────────────────────────────────────── */
+.page-wrapper { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+.page-hero {
+  padding: 120px 2rem 80px;
+  border-bottom: 1px solid var(--border);
+  max-width: 1200px; margin: 0 auto;
+}
+.page-hero .eyebrow { margin-bottom: 1rem; }
+.page-hero h1 { font-size: clamp(2.5rem,6vw,4.5rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1; margin-bottom: 1.5rem; }
+.page-hero p  { font-size: 1.1rem; color: var(--text-2); line-height: 1.7; max-width: 600px; }
+
+.section { padding: 80px 2rem; max-width: 1200px; margin: 0 auto; }
+.section-title { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+.section-sub   { color: var(--text-2); font-size: 0.95rem; margin-bottom: 3rem; }
+
+/* ── Footer ────────────────────────────────────────────────── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 3rem 2rem;
+  text-align: center;
+}
+.site-footer a {
+  color: var(--text-2); text-decoration: none;
+  transition: color 0.2s;
+}
+.site-footer a:hover { color: var(--teal); text-shadow: 0 0 10px rgba(0,242,254,0.5); }
+
+/* ── Page Transition Fade ──────────────────────────────────── */
+.page-fade-in { animation: pageFadeIn 0.5s ease forwards; }
+@keyframes pageFadeIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Misc Utilities ────────────────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 0; }
+.glow-teal   { box-shadow: 0 0 30px rgba(0,242,254,0.15); }
+.glow-violet { box-shadow: 0 0 30px rgba(124,58,237,0.2); }
+.tag {
+  display: inline-block; padding: 2px 10px; border-radius: 6px;
+  font-size: 0.72rem; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(255,255,255,0.06); color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .bento-grid { grid-template-columns: repeat(3,1fr); }
+  .mega-menu-grid { grid-template-columns: repeat(3,1fr); }
+  .bento-card.span-3 { grid-column: span 2; }
+}
+@media (max-width: 768px) {
+  .bento-grid { grid-template-columns: repeat(2,1fr); }
+  .mega-menu-grid { grid-template-columns: repeat(2,1fr); }
+  .nav-links { display: none; }
+  .bento-card.span-2,.bento-card.span-3 { grid-column: span 2; }
+}
+@media (max-width: 480px) {
+  .bento-grid { grid-template-columns: 1fr; }
+  .bento-card.span-2,.bento-card.span-3 { grid-column: span 1; }
+}

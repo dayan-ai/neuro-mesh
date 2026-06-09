@@ -1,360 +1,271 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEURO-MESH — Intelligent API Gateway</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: { accent: '#6d28d9', teal: '#14b8a6', slate: { 850: '#1a1f2e', 900: '#111827', 950: '#0a0e1a' } },
-      backdropBlur: { xs: '2px' }
-    }
-  }
-}
-</script>
-<style>
-  @keyframes gradientMove {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  .hero-bg {
-    background: linear-gradient(-45deg, #0f172a, #1e1b4b, #0f172a, #042f2e);
-    background-size: 400% 400%;
-    animation: gradientMove 12s ease infinite;
-  }
-  .glass {
-    background: rgba(255,255,255,0.03);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-  .glass-strong {
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .tab-active-bar { background: linear-gradient(90deg, #6d28d9, #14b8a6); height: 2px; }
-  .slider::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 18px; height: 18px;
-    border-radius: 50%; background: #6d28d9; cursor: pointer;
-    box-shadow: 0 0 8px rgba(109,40,217,0.5);
-  }
-  .slider::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: #334155; }
-  .slider { -webkit-appearance: none; width: 100%; background: transparent; }
-  .badge { font-size: 0.65rem; padding: 2px 8px; border-radius: 9999px; font-weight: 600; letter-spacing: 0.5px; }
-  .fade-in { animation: fadeIn 0.4s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .pulse-ring { animation: pulseRing 2s infinite; }
-  @keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(20,184,166,0.4); } 70% { box-shadow: 0 0 0 12px rgba(20,184,166,0); } 100% { box-shadow: 0 0 0 0 rgba(20,184,166,0); } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuro-Mesh | Predictive API Gateway</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { teal: '#00f2fe', violet: '#4facfe', dark: '#0f172a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <style>
+        /* Essential inline styles for App Overlay and Layout */
+        #app-overlay {
+            position: fixed; inset: 0; z-index: 2000;
+            background: rgba(3,7,18,0.98); backdrop-filter: blur(40px);
+            opacity: 0; pointer-events: none; transition: all 0.5s ease;
+            display: flex; flex-direction: column; padding: 2rem;
+        }
+        #app-overlay.open { opacity: 1; pointer-events: all; }
+        
+        .hero-video {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            object-fit: cover; z-index: -2; opacity: 0.6; mix-blend-screen: screen;
+        }
+        .hero-gradient {
+            position: fixed; inset: 0; z-index: -1;
+            background: linear-gradient(to bottom, rgba(3,7,18,0.4) 0%, rgba(3,7,18,0.95) 80%, #030712 100%);
+        }
+        
+        /* Dashboard App Styles */
+        .app-container {
+            flex-grow: 1; display: flex; flex-direction: column;
+            max-width: 1400px; margin: 0 auto; width: 100%;
+            border: 1px solid var(--border); border-radius: var(--radius-xl);
+            background: rgba(17,24,39,0.5); overflow: hidden; position: relative;
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-200 font-sans antialiased">
+<body>
 
-<!-- HERO SECTION -->
-<section class="hero-bg relative overflow-hidden">
-  <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(109,40,217,0.15),transparent_60%)]"></div>
-  <div class="relative z-10 max-w-5xl mx-auto px-6 py-20 text-center">
-    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass mb-6">
-      <span class="w-2 h-2 rounded-full bg-teal animate-pulse"></span>
-      <span class="text-xs text-slate-400 font-medium tracking-wide">System Online — All Services Healthy</span>
-    </div>
-    <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight">
-      <span class="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">WELCOME TO</span><br>
-      <span class="bg-gradient-to-r from-violet-400 to-teal bg-clip-text text-transparent">NEURO-MESH</span>
-    </h1>
-    <p class="mt-4 text-slate-400 text-lg max-w-xl mx-auto leading-relaxed">
-      An intelligent fault-tolerant API gateway with predictive ML failover, custom Trie routing, and real-time traffic analytics.
-    </p>
-    <div class="mt-8 flex justify-center gap-4 flex-wrap">
-      <div class="glass rounded-xl px-5 py-3 text-center">
-        <i class="fa-solid fa-diagram-project text-teal text-lg mb-1"></i>
-        <p class="text-xs text-slate-400">Custom Trie</p>
-        <p class="text-sm font-semibold text-white">O(log n) Routing</p>
-      </div>
-      <div class="glass rounded-xl px-5 py-3 text-center">
-        <i class="fa-solid fa-brain text-violet-400 text-lg mb-1"></i>
-        <p class="text-xs text-slate-400">Random Forest</p>
-        <p class="text-sm font-semibold text-white">ML Prediction</p>
-      </div>
-      <div class="glass rounded-xl px-5 py-3 text-center">
-        <i class="fa-solid fa-server text-teal text-lg mb-1"></i>
-        <p class="text-xs text-slate-400">HashMap</p>
-        <p class="text-sm font-semibold text-white">O(1) Lookups</p>
-      </div>
-    </div>
-  </div>
-</section>
+    <!-- Persistent Background -->
+    <video class="hero-video" autoplay loop muted playsinline>
+        <source src="20260603-0827-49.7706593.mp4" type="video/mp4">
+    </video>
+    <div class="hero-gradient"></div>
 
-<!-- NAVIGATION TABS -->
-<nav class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50">
-  <div class="max-w-5xl mx-auto px-6 flex gap-1">
-    <button onclick="switchTab('dsa')" id="tab-dsa" class="relative px-5 py-3.5 text-sm font-medium text-white">
-      <i class="fa-solid fa-sitemap mr-1.5 text-teal"></i>DSA Visualizer
-      <div class="tab-active-bar absolute bottom-0 left-0 right-0 rounded-full" id="bar-dsa"></div>
-    </button>
-    <button onclick="switchTab('chat')" id="tab-chat" class="relative px-5 py-3.5 text-sm font-medium text-slate-500 hover:text-slate-300 transition">
-      <i class="fa-solid fa-robot mr-1.5"></i>Neuro Chat
-      <div class="tab-active-bar absolute bottom-0 left-0 right-0 rounded-full hidden" id="bar-chat"></div>
-    </button>
-    <button onclick="switchTab('network')" id="tab-network" class="relative px-5 py-3.5 text-sm font-medium text-slate-500 hover:text-slate-300 transition">
-      <i class="fa-solid fa-network-wired mr-1.5"></i>Network Traffic
-      <div class="tab-active-bar absolute bottom-0 left-0 right-0 rounded-full hidden" id="bar-network"></div>
-    </button>
-  </div>
-</nav>
-
-<!-- MAIN CONTENT -->
-<main class="max-w-5xl mx-auto px-6 py-8">
-
-<!-- TAB 1: DSA VISUALIZER -->
-<div id="panel-dsa" class="fade-in">
-  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-    <!-- Server Health Cards -->
-    <div class="lg:col-span-2 space-y-4">
-      <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2"><i class="fa-solid fa-database mr-1 text-teal"></i> State Manager (HashMap)</h3>
-      <div id="server-cards" class="space-y-3"></div>
-    </div>
-    <!-- Route Map -->
-    <div class="lg:col-span-3">
-      <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2"><i class="fa-solid fa-route mr-1 text-violet-400"></i> Trie Route Map</h3>
-      <div class="glass-strong rounded-2xl p-5 max-h-[520px] overflow-y-auto">
-        <div id="route-map" class="space-y-2"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- TAB 2: NEURO CHAT -->
-<div id="panel-chat" class="hidden fade-in">
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-    <!-- Sliders Panel -->
-    <div class="glass-strong rounded-2xl p-6 space-y-6">
-      <h4 class="text-xs font-semibold uppercase tracking-widest text-slate-500"><i class="fa-solid fa-sliders mr-1 text-teal"></i> Input Metrics</h4>
-      <div>
-        <label class="flex justify-between text-xs text-slate-400 mb-1"><span>Latency P95</span><span id="val-latency" class="text-white font-semibold">200ms</span></label>
-        <input type="range" min="50" max="800" value="200" class="slider" id="sl-latency" oninput="document.getElementById('val-latency').textContent=this.value+'ms'">
-      </div>
-      <div>
-        <label class="flex justify-between text-xs text-slate-400 mb-1"><span>Error Rate</span><span id="val-error" class="text-white font-semibold">5%</span></label>
-        <input type="range" min="0" max="100" value="5" class="slider" id="sl-error" oninput="document.getElementById('val-error').textContent=this.value+'%'">
-      </div>
-      <div>
-        <label class="flex justify-between text-xs text-slate-400 mb-1"><span>Traffic (req/min)</span><span id="val-rps" class="text-white font-semibold">500</span></label>
-        <input type="range" min="100" max="5000" value="500" step="50" class="slider" id="sl-rps" oninput="document.getElementById('val-rps').textContent=this.value">
-      </div>
-      <button onclick="analyzeHealth()" class="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-teal font-semibold text-sm text-white hover:opacity-90 transition shadow-lg shadow-violet-900/30">
-        <i class="fa-solid fa-bolt mr-1"></i> Analyze
-      </button>
-    </div>
-    <!-- Chat Window -->
-    <div class="lg:col-span-2 glass-strong rounded-2xl p-6 flex flex-col">
-      <div class="flex items-center gap-2 mb-4">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-teal flex items-center justify-center">
-          <i class="fa-solid fa-brain text-white text-xs"></i>
+    <!-- Sticky Navigation -->
+    <nav id="site-nav">
+        <a href="#" class="nav-logo">
+            <div class="nav-logo-icon"><i class="ph-bold ph-circuitry"></i></div>
+            NEURO-MESH
+        </a>
+        <ul class="nav-links">
+            <li><a href="#overview" class="active">Overview</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#docs">Docs</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button class="btn-ghost" style="padding: 6px 16px; font-size: 0.8rem;">Login</button>
+            <button id="launcher-btn" title="App Launcher"><i class="ph-bold ph-squares-four"></i></button>
         </div>
-        <div>
-          <p class="text-sm font-semibold text-white">Neuro-Mesh AI</p>
-          <p class="text-[10px] text-slate-500">Predictive Failure Engine · Random Forest</p>
+    </nav>
+
+    <!-- Mega Menu -->
+    <div id="mega-menu">
+        <button id="menu-close" style="position:absolute;top:2rem;right:2rem;background:transparent;border:none;color:#fff;font-size:2rem;cursor:pointer;"><i class="ph ph-x"></i></button>
+        <h3 style="color:var(--text-2);margin-bottom:2rem;font-family:'JetBrains Mono';letter-spacing:0.1em;text-transform:uppercase;">System Navigation</h3>
+        <div class="mega-menu-grid">
+            <a href="#" class="mega-menu-card"><i class="ph ph-house icon text-teal-400"></i><span class="label">Home</span><span class="desc">Hero Cinematic Experience</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-cpu icon text-violet-400"></i><span class="label">Product Overview</span><span class="desc">The Neuro-Mesh Engine</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-tree-structure icon text-pink-400"></i><span class="label">Architecture</span><span class="desc">Visual Tech Map</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-sparkle icon text-teal-400"></i><span class="label">Features</span><span class="desc">Predictive Rerouting</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-shield-check icon text-emerald-400"></i><span class="label">Security Protocols</span><span class="desc">Zero-Trust Model</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-plugs-connected icon text-violet-400"></i><span class="label">Integration Hub</span><span class="desc">FastAPI, Docker, K8s</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-currency-dollar icon text-teal-400"></i><span class="label">Enterprise Pricing</span><span class="desc">Scale with Confidence</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-chart-line-up icon text-pink-400"></i><span class="label">Case Studies</span><span class="desc">Simulated Failure Reports</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-file-code icon text-violet-400"></i><span class="label">API Documentation</span><span class="desc">Swagger-Integrated Look</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-terminal-window icon text-emerald-400"></i><span class="label">Developer Resources</span><span class="desc">Git, CLI Tools</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-question icon text-teal-400"></i><span class="label">Support & FAQ</span><span class="desc">Get Help</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-users icon text-pink-400"></i><span class="label">Careers</span><span class="desc">The Neuro-Mesh Team</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-buildings icon text-violet-400"></i><span class="label">About Xiomics</span><span class="desc">The Parent Company</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-scales icon text-gray-400"></i><span class="label">Legal & Privacy</span><span class="desc">Terms of Service</span></a>
+            <a href="#" class="mega-menu-card"><i class="ph ph-envelope icon text-teal-400"></i><span class="label">Contact</span><span class="desc">Enterprise Inquiry</span></a>
         </div>
-      </div>
-      <div id="chat-messages" class="flex-1 space-y-3 overflow-y-auto max-h-[380px] pr-2 mb-4">
-        <div class="bg-slate-800/50 rounded-xl rounded-tl-sm p-3 text-sm text-slate-300 max-w-[85%]">
-          Hello! I'm <strong class="text-violet-400">Neuro-Mesh AI</strong>. I predict server failures <em>before</em> they happen. Adjust the sliders and hit <strong class="text-teal">Analyze</strong> to see my prediction.
-        </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- TAB 3: NETWORK TRAFFIC -->
-<div id="panel-network" class="hidden fade-in">
-  <div class="glass-strong rounded-2xl p-6">
-    <div class="flex items-center justify-between mb-5">
-      <div>
-        <h3 class="text-sm font-semibold text-white"><i class="fa-solid fa-chart-line mr-1.5 text-teal"></i> Real-Time Traffic Monitor</h3>
-        <p class="text-xs text-slate-500 mt-0.5">Last 50 captured packets — refreshes on demand</p>
-      </div>
-      <button onclick="loadNetworkLogs()" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300 hover:border-teal hover:text-white transition">
-        <i class="fa-solid fa-arrows-rotate mr-1"></i>Refresh
-      </button>
-    </div>
-    <div class="overflow-x-auto rounded-xl border border-slate-800">
-      <table class="w-full text-xs">
-        <thead class="bg-slate-900/80">
-          <tr class="text-slate-500 uppercase tracking-wider">
-            <th class="text-left py-2.5 px-3 font-medium">Time</th>
-            <th class="text-left py-2.5 px-3 font-medium">Source</th>
-            <th class="text-left py-2.5 px-3 font-medium">Destination</th>
-            <th class="text-left py-2.5 px-3 font-medium">Protocol</th>
-            <th class="text-left py-2.5 px-3 font-medium">Length</th>
-            <th class="text-left py-2.5 px-3 font-medium">Info</th>
-          </tr>
-        </thead>
-        <tbody id="network-tbody" class="text-slate-300 divide-y divide-slate-800/50"></tbody>
-      </table>
-    </div>
-    <div id="network-empty" class="text-center py-12 text-slate-600">
-      <i class="fa-solid fa-satellite-dish text-3xl mb-3 block text-slate-700"></i>
-      <p class="text-sm">No traffic captured yet.</p>
-      <p class="text-xs text-slate-700 mt-1">Send requests via <code class="text-teal">/proxy/...</code> to populate this view.</p>
-    </div>
-  </div>
-</div>
-
-</main>
-
-<!-- FOOTER -->
-<footer class="border-t border-slate-800/50 mt-12 py-6 text-center">
-  <p class="text-xs text-slate-600">
-    Powered by
-    <a href="https://xiomics.systems" target="_blank" rel="noopener"
-       class="text-violet-400 font-semibold hover:text-teal transition-colors duration-300">
-      Xiomics Systems
-    </a>
-  </p>
-</footer>
-
-<script>
-// --- Tab Switching ---
-function switchTab(tab) {
-  ['dsa','chat','network'].forEach(t => {
-    document.getElementById('panel-'+t).classList.add('hidden');
-    document.getElementById('tab-'+t).classList.remove('text-white');
-    document.getElementById('tab-'+t).classList.add('text-slate-500');
-    document.getElementById('bar-'+t).classList.add('hidden');
-  });
-  document.getElementById('panel-'+tab).classList.remove('hidden');
-  document.getElementById('tab-'+tab).classList.add('text-white');
-  document.getElementById('tab-'+tab).classList.remove('text-slate-500');
-  document.getElementById('bar-'+tab).classList.remove('hidden');
-  if (tab==='dsa') loadDSA();
-  if (tab==='network') loadNetworkLogs();
-}
-
-// --- DSA Visualizer ---
-async function loadDSA() {
-  try {
-    const r = await fetch('/dsa-state');
-    const d = await r.json();
-    renderServers(d.hashmap.servers);
-    renderRouteMap(d.trie);
-  } catch(e) { console.error(e); }
-}
-
-function renderServers(servers) {
-  const c = document.getElementById('server-cards');
-  c.innerHTML = '';
-  for (const [id, info] of Object.entries(servers)) {
-    const alive = info.status === 'Alive';
-    c.innerHTML += `
-      <div class="glass-strong rounded-xl p-4 ${alive ? 'border-teal/30' : 'border-red-500/30'} border transition-all">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg ${alive ? 'bg-teal/10' : 'bg-red-500/10'} flex items-center justify-center">
-              <i class="fa-solid fa-server ${alive ? 'text-teal' : 'text-red-400'}"></i>
+    <!-- Main Content -->
+    <main style="padding-top: 64px;">
+        <!-- Hero -->
+        <section class="page-hero" style="text-align: center; min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div class="badge badge-violet" data-reveal style="margin-bottom: 2rem;"><span class="dot pulse"></span> NEURO-MESH ENGINE v2.0</div>
+            <h1 data-reveal data-delay="1">Predictive <span class="text-gradient">API Gateway</span></h1>
+            <p data-reveal data-delay="2" style="margin-bottom: 3rem;">Powered by Data Science and custom DSA, Neuro-Mesh intercepts network anomalies and preemptively reroutes traffic before a failure occurs. Eliminating 5xx errors in real-time.</p>
+            <div data-reveal data-delay="3" style="display: flex; gap: 1rem;">
+                <button class="btn-primary" data-launch-app>Give It A Try <i class="ph-bold ph-rocket-launch"></i></button>
+                <a href="#overview" class="btn-ghost">View Architecture</a>
             </div>
-            <div>
-              <p class="text-sm font-semibold text-white">${id.charAt(0).toUpperCase()+id.slice(1)} Server</p>
-              <p class="text-[10px] text-slate-500 font-mono">${info.address}</p>
+        </section>
+
+        <!-- Bento Grid Features -->
+        <section id="overview" class="section">
+            <h2 class="section-title" data-reveal>System Capabilities</h2>
+            <p class="section-sub" data-reveal>Advanced telemetry and predictive modeling at the edge.</p>
+            
+            <div class="bento-grid">
+                <div class="bento-card span-2 row-2" data-reveal>
+                    <div>
+                        <div class="card-tag">Core Engine</div>
+                        <h3 class="card-title" style="font-size: 1.5rem;">Predictive Rerouting</h3>
+                        <p class="card-desc">Machine learning models analyze traffic patterns to predict node failures milliseconds before they occur, seamlessly shifting loads to healthy clusters without dropping connections.</p>
+                    </div>
+                    <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-family:'JetBrains Mono'; color:var(--teal); font-size:0.8rem;">Latency: < 5ms</span>
+                        <i class="ph-fill ph-check-circle" style="color:#34d399; font-size:1.2rem;"></i>
+                    </div>
+                    <i class="ph ph-arrow-up-right card-arrow"></i>
+                </div>
+                
+                <div class="bento-card violet" data-reveal data-delay="1">
+                    <i class="ph-fill ph-shield-warning card-icon text-violet-400"></i>
+                    <h3 class="card-title">Anomaly Detection</h3>
+                    <p class="card-desc">Real-time deep packet inspection identifying zero-day threats.</p>
+                    <i class="ph ph-arrow-up-right card-arrow"></i>
+                </div>
+                
+                <div class="bento-card" data-reveal data-delay="2">
+                    <i class="ph-fill ph-scales card-icon text-teal-400"></i>
+                    <h3 class="card-title">Load Balancing</h3>
+                    <p class="card-desc">Dynamic weight distribution using advanced Trie-based algorithms.</p>
+                    <i class="ph ph-arrow-up-right card-arrow"></i>
+                </div>
+                
+                <div class="bento-card span-2" data-reveal data-delay="1">
+                    <div style="display: flex; gap: 1rem; align-items: center; height: 100%;">
+                        <div style="flex: 1;">
+                            <div class="card-tag">Observability</div>
+                            <h3 class="card-title">Telemetry & Tracing</h3>
+                            <p class="card-desc">Full visibility into microservice health with distributed tracing integration.</p>
+                        </div>
+                        <div style="flex: 1; height: 80px; background: repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 10px); position: relative;">
+                            <svg viewBox="0 0 100 40" preserveAspectRatio="none" style="width:100%; height:100%; position:absolute; top:0; left:0;">
+                                <path d="M0,20 Q10,10 20,20 T40,20 T60,10 T80,30 T100,20" fill="none" stroke="var(--teal)" stroke-width="2" style="filter: drop-shadow(0 0 4px var(--teal));"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="badge ${alive ? 'bg-teal/20 text-teal' : 'bg-red-500/20 text-red-400'}">
-              <i class="fa-solid ${alive ? 'fa-circle-check' : 'fa-circle-xmark'} mr-0.5"></i>${info.status}
-            </span>
-            <div class="w-2.5 h-2.5 rounded-full ${alive ? 'bg-teal pulse-ring' : 'bg-red-500 animate-pulse'}"></div>
-          </div>
+        </section>
+    </main>
+
+    <!-- App Overlay (Dashboard) -->
+    <div id="app-overlay">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div class="nav-logo"><div class="nav-logo-icon"><i class="ph-bold ph-circuitry"></i></div> NEURO-MESH <span class="badge badge-green" style="margin-left:1rem;"><span class="dot pulse"></span> LIVE ENVIRONMENT</span></div>
+            <button id="overlay-close" class="btn-ghost" style="padding: 8px 12px;"><i class="ph ph-x"></i> Exit App</button>
         </div>
-        <div class="mt-3 pt-3 border-t border-slate-800/50 flex justify-between text-[10px] text-slate-500">
-          <span>Lookup: O(1)</span><span>Data Structure: HashMap</span>
+        
+        <div class="app-container glass">
+            <!-- Tabs Nav -->
+            <nav style="display: flex; border-bottom: 1px solid var(--border); background: rgba(3,7,18,0.5);">
+                <button id="btn-tab-dsa" onclick="switchTab('tab-dsa')" class="glass-tab active" style="flex:1; padding:1rem; border:none; background:transparent; color:var(--text-1); cursor:pointer; font-weight:500; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:all 0.2s;">
+                    <i class="ph ph-graph"></i> DSA Visualizer
+                </button>
+                <button id="btn-tab-chat" onclick="switchTab('tab-chat')" class="glass-tab" style="flex:1; padding:1rem; border:none; background:transparent; color:var(--text-2); cursor:pointer; font-weight:500; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:all 0.2s;">
+                    <i class="ph ph-robot"></i> Neuro Chat
+                </button>
+                <button id="btn-tab-traffic" onclick="switchTab('tab-traffic')" class="glass-tab" style="flex:1; padding:1rem; border:none; background:transparent; color:var(--text-2); cursor:pointer; font-weight:500; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:all 0.2s;">
+                    <i class="ph ph-activity"></i> Network Traffic
+                </button>
+            </nav>
+            
+            <style>
+                .glass-tab.active { border-bottom: 2px solid var(--teal) !important; color: #fff !important; background: rgba(255,255,255,0.05) !important; }
+                .glass-tab:hover:not(.active) { color: #fff !important; background: rgba(255,255,255,0.02) !important; }
+            </style>
+
+            <div style="flex-grow: 1; position: relative;">
+                <!-- Tab 1: DSA -->
+                <div id="tab-dsa" style="position: absolute; inset: 0; padding: 2rem; display: flex; flex-direction: column; transition: opacity 0.4s;">
+                    <h3 style="margin-bottom: 1rem; font-family: 'JetBrains Mono'; color: var(--text-2);">Live Node Topology</h3>
+                    <div style="flex-grow: 1; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-2); display: flex; align-items: center; justify-content: center; position: relative;">
+                        <svg style="position:absolute; inset:0; width:100%; height:100%;"><path d="M50% 20% L30% 50% M50% 20% L70% 50% M30% 50% L20% 80% M30% 50% L40% 80%" stroke="rgba(255,255,255,0.1)" stroke-dasharray="4,4" fill="none"/></svg>
+                        <div style="position:absolute; top:20%; left:50%; transform:translate(-50%,-50%); text-align:center;"><i class="ph ph-tree-structure" style="font-size:2.5rem; color:var(--teal); text-shadow:0 0 15px var(--teal);"></i><br><span style="font-family:monospace;font-size:10px;">Router</span></div>
+                        <div style="position:absolute; top:50%; left:30%; transform:translate(-50%,-50%); text-align:center;"><i class="ph-fill ph-hard-drives dsa-node" style="font-size:2rem; color:#34d399; transition:all 0.2s;"></i><br><span style="font-family:monospace;font-size:10px;">Node_A</span></div>
+                        <div style="position:absolute; top:50%; left:70%; transform:translate(-50%,-50%); text-align:center;"><i class="ph-fill ph-hard-drives dsa-node" style="font-size:2rem; color:#34d399; transition:all 0.2s;"></i><br><span style="font-family:monospace;font-size:10px;">Node_B</span></div>
+                        <div style="position:absolute; top:80%; left:20%; transform:translate(-50%,-50%); text-align:center;"><i class="ph-fill ph-database dsa-node" style="font-size:1.5rem; color:#34d399;"></i></div>
+                        <div style="position:absolute; top:80%; left:40%; transform:translate(-50%,-50%); text-align:center;"><i class="ph-fill ph-database dsa-node" style="font-size:1.5rem; color:#f87171;"></i></div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Chat -->
+                <div id="tab-chat" style="position: absolute; inset: 0; display: flex; opacity: 0; pointer-events: none; transition: opacity 0.4s;">
+                    <div style="width: 300px; border-right: 1px solid var(--border); padding: 2rem; background: rgba(0,0,0,0.2);">
+                        <h4 style="margin-bottom: 1.5rem;">Parameters</h4>
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.5rem;"><span>Latency</span><span id="val-latency" style="color:var(--teal);">45ms</span></div>
+                            <input type="range" id="slider-latency" min="5" max="300" value="45" style="width:100%;" oninput="updateSlider('latency', this.value, 'ms')">
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.5rem;"><span>Error Rate</span><span id="val-error" style="color:var(--violet-lt);">2%</span></div>
+                            <input type="range" id="slider-error" min="0" max="100" value="2" style="width:100%;" oninput="updateSlider('error', this.value, '%')">
+                        </div>
+                        <div style="margin-bottom: 2rem;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.5rem;"><span>Traffic Load</span><span id="val-traffic" style="color:#34d399;">65%</span></div>
+                            <input type="range" id="slider-traffic" min="0" max="100" value="65" style="width:100%;" oninput="updateSlider('traffic', this.value, '%')">
+                        </div>
+                        <button onclick="predictFailure()" class="btn-primary" style="width:100%; justify-content:center;">Predict Failure</button>
+                    </div>
+                    <div style="flex-grow: 1; padding: 2rem; display: flex; flex-direction: column;">
+                        <div id="chat-container" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding-right: 1rem;">
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background:#0f172a;border:1px solid rgba(124,58,237,.4)">
+                                    <i class="ph ph-brain" style="color:#00f2fe;font-size:1.2rem"></i>
+                                </div>
+                                <div class="bg-white/5 border border-white/10 rounded-2xl rounded-tl-none p-4 text-sm max-w-[85%]">
+                                    <p>System initialized. I am the Neuro-Mesh Diagnostics AI.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Traffic -->
+                <div id="tab-traffic" style="position: absolute; inset: 0; padding: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.4s; display: flex; flex-direction: column;">
+                    <div style="flex-grow: 1; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-2); overflow: hidden;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead style="background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--border);">
+                                <tr>
+                                    <th style="padding:12px 16px;font-size:0.75rem;text-transform:uppercase;color:var(--text-3);">Timestamp</th>
+                                    <th style="padding:12px 16px;font-size:0.75rem;text-transform:uppercase;color:var(--text-3);">Source IP</th>
+                                    <th style="padding:12px 16px;font-size:0.75rem;text-transform:uppercase;color:var(--text-3);">Destination IP</th>
+                                    <th style="padding:12px 16px;font-size:0.75rem;text-transform:uppercase;color:var(--text-3);">Protocol</th>
+                                    <th style="padding:12px 16px;font-size:0.75rem;text-transform:uppercase;color:var(--text-3);">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="traffic-table-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>`;
-  }
-}
+    </div>
 
-function renderRouteMap(trie) {
-  const c = document.getElementById('route-map');
-  c.innerHTML = trie.registered_routes.map((route, i) => {
-    const [path, service] = route.split(' → ');
-    const isDynamic = path.includes('{');
-    return `<div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-800/30 transition group">
-      <span class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold ${isDynamic ? 'bg-amber-500/10 text-amber-400' : 'bg-teal/10 text-teal'}">${i+1}</span>
-      <div class="flex-1 min-w-0">
-        <p class="text-xs font-mono text-slate-300 truncate">${path}</p>
-      </div>
-      <i class="fa-solid fa-arrow-right text-[8px] text-slate-600 group-hover:text-teal transition"></i>
-      <span class="badge bg-violet-500/10 text-violet-400">${service}</span>
-      <span class="badge ${isDynamic ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-700 text-slate-400'}">${isDynamic ? 'Dynamic' : 'Static'}</span>
-    </div>`;
-  }).join('');
-}
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p>Powered by <a href="https://xiomics.systems">Xiomics Systems</a></p>
+    </footer>
 
-// --- Neuro Chat ---
-function analyzeHealth() {
-  const latency = parseInt(document.getElementById('sl-latency').value);
-  const errorRate = parseInt(document.getElementById('sl-error').value) / 100;
-  const rps = parseInt(document.getElementById('sl-rps').value);
-  const msgs = document.getElementById('chat-messages');
-
-  msgs.innerHTML += `<div class="bg-teal/5 border border-teal/20 rounded-xl rounded-tr-sm p-3 text-sm text-slate-300 ml-auto max-w-[80%]">
-    Analyze: Latency <strong>${latency}ms</strong>, Error Rate <strong>${(errorRate*100).toFixed(0)}%</strong>, Traffic <strong>${rps} req/min</strong>
-  </div>`;
-
-  fetch('/predict-health', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({rolling_latency_p95: latency, error_rate_1min: errorRate, requests_per_minute: rps})
-  }).then(r=>r.json()).then(data => {
-    const fail = data.failure_predicted;
-    const conf = (data.confidence ? (fail ? data.confidence.fail_probability : data.confidence.survive_probability) * 100 : 0).toFixed(1);
-    msgs.innerHTML += `<div class="bg-slate-800/50 rounded-xl rounded-tl-sm p-3 text-sm max-w-[85%] fade-in">
-      <div class="flex items-center gap-2 mb-2">
-        <span class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-teal flex items-center justify-center"><i class="fa-solid fa-brain text-[8px] text-white"></i></span>
-        <span class="text-[10px] text-slate-500 font-medium">NEURO-MESH AI</span>
-      </div>
-      ${fail
-        ? `<p class="text-red-400 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Warning! Failure Predicted</p>
-           <p class="text-xs text-slate-400 mt-1">Based on latency of <strong>${latency}ms</strong> and error rate of <strong>${(errorRate*100).toFixed(0)}%</strong>, I predict the primary server will crash. <span class="text-teal font-semibold">Rerouting to fallback...</span></p>`
-        : `<p class="text-teal font-semibold"><i class="fa-solid fa-shield-check mr-1"></i>All Clear — Server Will Survive</p>
-           <p class="text-xs text-slate-400 mt-1">Current metrics are within safe operating range. No failover needed.</p>`}
-      <p class="text-[10px] text-slate-600 mt-2">Confidence: ${conf}% · Model: RandomForest (100 trees)</p>
-    </div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-  }).catch(e => {
-    msgs.innerHTML += `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-xs text-red-400 max-w-[85%]"><i class="fa-solid fa-circle-exclamation mr-1"></i>Connection error. Ensure the server is running.</div>`;
-  });
-}
-
-// --- Network Traffic ---
-async function loadNetworkLogs() {
-  try {
-    const r = await fetch('/network-logs');
-    const d = await r.json();
-    const tbody = document.getElementById('network-tbody');
-    const empty = document.getElementById('network-empty');
-    if (!d.logs || d.logs.length === 0) { empty.classList.remove('hidden'); tbody.innerHTML=''; return; }
-    empty.classList.add('hidden');
-    tbody.innerHTML = d.logs.map(l => {
-      const isOk = l.status === 200;
-      return `<tr class="hover:bg-slate-800/30 transition">
-        <td class="py-2 px-3 text-slate-500 font-mono">${l.time}</td>
-        <td class="py-2 px-3 font-mono">${l.source_ip}</td>
-        <td class="py-2 px-3 font-mono">${l.dest_ip}</td>
-        <td class="py-2 px-3"><span class="badge ${l.protocol==='HTTP/1.1'?'bg-teal/10 text-teal':'bg-amber-500/10 text-amber-400'}">${l.protocol}</span></td>
-        <td class="py-2 px-3 text-slate-400">${l.length} B</td>
-        <td class="py-2 px-3 text-slate-400 truncate max-w-[200px]"><span class="badge mr-1 ${isOk?'bg-green-500/10 text-green-400':'bg-red-500/10 text-red-400'}">${l.status}</span>${l.info}</td>
-      </tr>`;
-    }).join('');
-  } catch(e) { console.error(e); }
-}
-
-// Init
-loadDSA();
-setInterval(loadDSA, 5000);
-</script>
+    <script src="assets/js/main.js"></script>
+    <style>
+        /* Small fixes for inline injected HTML in chat/traffic */
+        .flex { display: flex; } .items-start { align-items: flex-start; } .gap-4 { gap: 1rem; } .justify-end { justify-content: flex-end; } .rounded-full { border-radius: 9999px; } .flex-shrink-0 { flex-shrink: 0; } .rounded-2xl { border-radius: 1rem; } .rounded-tl-none { border-top-left-radius: 0; } .rounded-tr-none { border-top-right-radius: 0; } .max-w-\[85\%\] { max-width: 85%; } .text-sm { font-size: 0.875rem; } .p-4 { padding: 1rem; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </body>
 </html>
