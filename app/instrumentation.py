@@ -9,6 +9,7 @@ import json
 import logging
 import time
 import uuid
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -33,7 +34,7 @@ class StructuredLogger:
             "request_id": request_id_var.get(),
             "correlation_id": correlation_id_var.get(),
             "user_id": user_id_var.get(),
-            "timestamp": time.time(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     def _log(self, level: int, message: str, **kwargs: Any) -> None:

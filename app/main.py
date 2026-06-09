@@ -19,7 +19,6 @@ import os
 import pickle
 import random
 import signal
-import sys
 import traceback
 from collections import deque
 from contextlib import asynccontextmanager
@@ -152,7 +151,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     - Setup graceful shutdown handlers
     """
     logger.info(
-        "Gateway started on 0.0.0.0:8000",
+        f"Gateway started on {DEFAULT_HOST}:{DEFAULT_PORT}",
         environment=config.environment,
         host=DEFAULT_HOST,
         port=DEFAULT_PORT,
@@ -183,7 +182,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Graceful shutdown handler
     def signal_handler(signum: int, frame: Any) -> None:
         logger.info("Shutdown signal received", signal_number=signum)
-        sys.exit(0)
+        # Don't exit immediately - let the lifespan context manager handle cleanup
+        # The actual exit will happen when the async context completes
 
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
