@@ -5,6 +5,12 @@ into a single FastAPI application instance. It configures startup events,
 global exception handling, route registration, DSA visualization, ML prediction,
 and network traffic logging.
 
+Enterprise features:
+- Structured logging with correlation IDs
+- Request instrumentation and tracing
+- Environment-based configuration
+- Graceful shutdown handling
+
 Deployment: Vercel-ready with dynamic path resolution for model.pkl.
 """
 
@@ -12,6 +18,8 @@ import logging
 import os
 import pickle
 import random
+import signal
+import sys
 import traceback
 from collections import deque
 from contextlib import asynccontextmanager
@@ -24,24 +32,34 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 
+from app.config import EnterpriseConfig
 from app.health_routes import health_router
+from app.instrumentation import InstrumentationMiddleware, StructuredLogger, get_structured_logger
 from app.routes import router as proxy_router
 from app.state_manager import StateManager
 from app.trie import Trie, TrieNode
 import app.health_routes as health_routes_module
 import app.routes as routes_module
 
-logger = logging.getLogger(__name__)
+# Load enterprise configuration
+config = EnterpriseConfig.from_env()
+
+# Configure logging
+logging.basicConfig(
+    level=getattr(logging, config.log_level),
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = get_structured_logger(__name__, enable_json=config.structured_logging)
 
 # ---------------------------------------------------------------------------
-# Path resolution (Vercel-compatible)
+# Configuration (enterprise-grade)
 # ---------------------------------------------------------------------------
 BASE_DIR: Path = Path(os.path.dirname(os.path.abspath(__file__))).parent
 MODEL_PATH: Path = BASE_DIR / "model.pkl"
 
-# Configuration defaults
-DEFAULT_HOST: str = "0.0.0.0"
-DEFAULT_PORT: int = 8000
+# Use config from environment
+DEFAULT_HOST: str = config.host
+DEFAULT_PORT: int = config.port
 
 # Pre-configured routes registered at startup — expanded to 10+ for DSA showcase
 STARTUP_ROUTES: list[tuple[str, str]] = [
@@ -111,11 +129,11 @@ def _load_ml_model() -> Any:
         try:
             with open(MODEL_PATH, "rb") as f:
                 _ml_model = pickle.load(f)
-            logger.info("ML model loaded from %s", MODEL_PATH)
+            logger.info("ML model loaded", model_path=str(MODEL_PATH))
         except Exception as e:
-            logger.warning("Failed to load ML model: %s", e)
+            logger.warning("Failed to load ML model", error=str(e))
     else:
-        logger.info("model.pkl not found at %s — prediction disabled", MODEL_PATH)
+        logger.info("model.pkl not found", model_path=str(MODEL_PATH), status="prediction_disabled")
     return _ml_model
 
 
@@ -126,7 +144,21 @@ def _load_ml_model() -> Any:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Application lifespan: create Trie + StateManager, register routes, load model."""
+    """Application lifespan with enterprise features.
+    
+    - Wire Trie router and State Manager
+    - Register startup routes
+    - Load ML model
+    - Setup graceful shutdown handlers
+    """
+    logger.info(
+        "Gateway started on 0.0.0.0:8000",
+        environment=config.environment,
+        host=DEFAULT_HOST,
+        port=DEFAULT_PORT,
+        structured_logging=config.structured_logging,
+    )
+
     trie = Trie()
     state_manager = StateManager()
 
@@ -140,16 +172,36 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     app.state.trie = trie
     app.state.state_manager = state_manager
+    app.state.config = config
 
     # Pre-load ML model
-    _load_ml_model()
+    if config.enable_ml_predictions:
+        _load_ml_model()
 
-    logger.info("Gateway started on %s:%d", DEFAULT_HOST, DEFAULT_PORT)
+    logger.info("Gateway startup complete", routes_registered=len(STARTUP_ROUTES))
+
+    # Graceful shutdown handler
+    def signal_handler(signum: int, frame: Any) -> None:
+        logger.info("Shutdown signal received", signal_number=signum)
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
     yield
-    logger.info("Gateway shutting down")
+
+    logger.info("Gateway shutting down", grace_period_seconds=config.shutdown_grace_period_seconds)
 
 
-app = FastAPI(title="NEURO-MESH API Gateway", lifespan=lifespan)
+app = FastAPI(
+    title="NEURO-MESH API Gateway",
+    description="Enterprise-grade fault-tolerant API gateway with ML predictive failover",
+    lifespan=lifespan,
+)
+
+# Add enterprise instrumentation middleware
+instrumentation_logger = get_structured_logger(__name__, enable_json=config.structured_logging)
+app.add_middleware(InstrumentationMiddleware, logger=instrumentation_logger)
 
 # Include routers
 app.include_router(proxy_router)
@@ -276,14 +328,28 @@ async def dashboard() -> HTMLResponse:
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Catch all unhandled exceptions. Log details, return generic 500."""
+    """Catch all unhandled exceptions with enterprise error handling.
+    
+    - Logs full stack trace with correlation context
+    - Returns generic error message (no internal details)
+    """
     logger.error(
-        "Unhandled exception: type=%s message=%s\n%s",
-        type(exc).__name__, str(exc), traceback.format_exc(),
+        "Unhandled exception in request",
+        error_type=type(exc).__name__,
+        error_message=str(exc),
+        stack_trace=traceback.format_exc(),
     )
-    return JSONResponse(status_code=500, content={"error": "Internal server error"})
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error"},
+    )
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host=DEFAULT_HOST, port=DEFAULT_PORT)
+    uvicorn.run(
+        app,
+        host=DEFAULT_HOST,
+        port=DEFAULT_PORT,
+        log_level=config.log_level.lower(),
+    )
