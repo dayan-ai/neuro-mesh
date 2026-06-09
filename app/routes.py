@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 # Module-level references set by main.py during app initialization
 trie: Trie | None = None
 state_manager: StateManager | None = None
+record_network_log: Any = None  # Set by main.py lifespan
 
 # ML Model for predictive failover
 _ml_model: Any = None
@@ -217,6 +218,10 @@ async def proxy_handler(path: str) -> JSONResponse:
         selected_server,
         failure_predicted,
     )
+
+    # Step 7: Record in network traffic log (if available)
+    if record_network_log is not None:
+        record_network_log(path, selected_server, destination, 200, routing_decision)
 
     return JSONResponse(
         status_code=200,

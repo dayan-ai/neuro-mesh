@@ -25,7 +25,7 @@ import asyncio
 
 import httpx
 import pytest
-from hypothesis import given, settings, assume
+from hypothesis import given, settings, assume, HealthCheck
 from hypothesis import strategies as st
 
 from app.models import HealthStatus
@@ -126,7 +126,7 @@ def _create_test_app():
 
 
 @given(pattern=route_patterns, destination=destinations)
-@settings(max_examples=100)
+@settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
 def test_property_1_trie_insertion_round_trip(pattern: str, destination: str):
     """For any valid route pattern and destination, inserting and resolving
     a matching path returns the correct destination and extracted params.

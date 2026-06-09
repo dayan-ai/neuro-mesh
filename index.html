@@ -3,277 +3,358 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEURO-MESH Client</title>
+<title>NEURO-MESH — Intelligent API Gateway</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: { accent: '#6d28d9', teal: '#14b8a6', slate: { 850: '#1a1f2e', 900: '#111827', 950: '#0a0e1a' } },
+      backdropBlur: { xs: '2px' }
+    }
+  }
+}
+</script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: #0d0d1a;
-    color: #e0e0e0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2.5rem 1.5rem;
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
-  .logo-wrap { margin-bottom: 1rem; }
-  .header { text-align: center; margin-bottom: 2.5rem; }
-  .header h1 {
-    font-size: 2rem;
-    background: linear-gradient(135deg, #00d4ff, #7b2ff7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .hero-bg {
+    background: linear-gradient(-45deg, #0f172a, #1e1b4b, #0f172a, #042f2e);
+    background-size: 400% 400%;
+    animation: gradientMove 12s ease infinite;
   }
-  .header p { color: #777; margin-top: 0.4rem; font-size: 0.9rem; }
-  .panel {
-    background: #14142b; border: 1px solid #2a2a4a;
-    border-radius: 16px; padding: 2.5rem;
-    width: 100%; max-width: 560px; text-align: center;
+  .glass {
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
   }
-  .panel h2 {
-    font-size: 1.05rem; color: #aaa; text-transform: uppercase;
-    letter-spacing: 1.5px; margin-bottom: 1.5rem; font-weight: 500;
+  .glass-strong {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.1);
   }
-  .btn {
-    background: linear-gradient(135deg, #7b2ff7, #00d4ff);
-    border: none; color: #fff; font-size: 0.95rem; font-weight: 600;
-    padding: 0.85rem 2rem; border-radius: 8px; cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.3s; letter-spacing: 0.5px;
+  .tab-active-bar { background: linear-gradient(90deg, #6d28d9, #14b8a6); height: 2px; }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px;
+    border-radius: 50%; background: #6d28d9; cursor: pointer;
+    box-shadow: 0 0 8px rgba(109,40,217,0.5);
   }
-  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(123,47,247,0.35); }
-  .btn:active { transform: translateY(0); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-  .response-box {
-    margin-top: 1.5rem; background: #1a1a2e; border: 1px solid #2a2a4a;
-    border-radius: 10px; padding: 1.2rem; text-align: left;
-    font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.78rem;
-    color: #8892b0; max-height: 220px; overflow-y: auto;
-    white-space: pre-wrap; word-break: break-word; display: none;
-  }
-  .response-box.visible { display: block; }
-  .toast-container {
-    position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999;
-    display: flex; flex-direction: column; gap: 0.8rem;
-  }
-  .toast {
-    padding: 1rem 1.5rem; border-radius: 10px; font-size: 0.9rem; font-weight: 500;
-    display: flex; align-items: center; gap: 0.7rem;
-    animation: slideIn 0.35s ease-out, fadeOut 0.4s 3.5s ease-in forwards;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4); max-width: 380px;
-  }
-  .toast-primary { background: #0a2e1a; border: 1px solid #00ff88; color: #00ff88; }
-  .toast-fallback { background: #2e1f0a; border: 1px solid #ffaa00; color: #ffaa00; }
-  .toast-error { background: #2e0a0a; border: 1px solid #ff4444; color: #ff4444; }
-  .toast .icon { font-size: 1.3rem; }
-  @keyframes slideIn { from{transform:translateX(100%);opacity:0;} to{transform:translateX(0);opacity:1;} }
-  @keyframes fadeOut { from{opacity:1;} to{opacity:0;transform:translateX(30px);} }
-  .history { margin-top: 2rem; width: 100%; max-width: 560px; }
-  .history h3 { color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem; }
-  .history-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
-  .history-item {
-    background: #14142b; border: 1px solid #2a2a4a; border-radius: 8px;
-    padding: 0.7rem 1rem; font-size: 0.82rem; display: flex; align-items: center; gap: 0.6rem;
-  }
-  .history-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .dot-green { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
-  .dot-orange { background: #ffaa00; box-shadow: 0 0 6px #ffaa00; }
-  .dot-red { background: #ff4444; box-shadow: 0 0 6px #ff4444; }
-  .history-item .time { color: #555; margin-left: auto; font-size: 0.75rem; }
-  .footer { text-align: center; margin-top: 2.5rem; color: #555; font-size: 0.8rem; }
-  .footer .brand { color: #7b2ff7; font-weight: 600; }
+  .slider::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: #334155; }
+  .slider { -webkit-appearance: none; width: 100%; background: transparent; }
+  .badge { font-size: 0.65rem; padding: 2px 8px; border-radius: 9999px; font-weight: 600; letter-spacing: 0.5px; }
+  .fade-in { animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .pulse-ring { animation: pulseRing 2s infinite; }
+  @keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(20,184,166,0.4); } 70% { box-shadow: 0 0 0 12px rgba(20,184,166,0); } 100% { box-shadow: 0 0 0 0 rgba(20,184,166,0); } }
 </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-200 font-sans antialiased">
 
-<!-- Embedded SVG Logo -->
-<div class="logo-wrap">
-  <svg width="90" height="90" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.3"/>
-        <stop offset="100%" stop-color="#0f0f1a" stop-opacity="0"/>
-      </radialGradient>
-      <linearGradient id="nodeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#00d4ff"/>
-        <stop offset="100%" stop-color="#7b2ff7"/>
-      </linearGradient>
-      <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.7"/>
-        <stop offset="100%" stop-color="#7b2ff7" stop-opacity="0.4"/>
-      </linearGradient>
-    </defs>
-    <circle cx="100" cy="100" r="95" fill="url(#glow)"/>
-    <!-- Connections -->
-    <line x1="100" y1="50" x2="55" y2="100" stroke="url(#lineGrad)" stroke-width="2"/>
-    <line x1="100" y1="50" x2="145" y2="100" stroke="url(#lineGrad)" stroke-width="2"/>
-    <line x1="55" y1="100" x2="75" y2="155" stroke="url(#lineGrad)" stroke-width="2"/>
-    <line x1="145" y1="100" x2="125" y2="155" stroke="url(#lineGrad)" stroke-width="2"/>
-    <line x1="55" y1="100" x2="145" y2="100" stroke="url(#lineGrad)" stroke-width="1.5"/>
-    <line x1="75" y1="155" x2="125" y2="155" stroke="url(#lineGrad)" stroke-width="1.5"/>
-    <line x1="100" y1="50" x2="75" y2="155" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="4,3"/>
-    <line x1="100" y1="50" x2="125" y2="155" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="4,3"/>
-    <!-- Nodes -->
-    <circle cx="100" cy="50" r="12" fill="url(#nodeGrad)" opacity="0.95"/>
-    <circle cx="55" cy="100" r="10" fill="url(#nodeGrad)" opacity="0.85"/>
-    <circle cx="145" cy="100" r="10" fill="url(#nodeGrad)" opacity="0.85"/>
-    <circle cx="75" cy="155" r="9" fill="url(#nodeGrad)" opacity="0.75"/>
-    <circle cx="125" cy="155" r="9" fill="url(#nodeGrad)" opacity="0.75"/>
-    <!-- Inner glow dots -->
-    <circle cx="100" cy="50" r="5" fill="#fff" opacity="0.6"/>
-    <circle cx="55" cy="100" r="4" fill="#fff" opacity="0.5"/>
-    <circle cx="145" cy="100" r="4" fill="#fff" opacity="0.5"/>
-    <circle cx="75" cy="155" r="3.5" fill="#fff" opacity="0.4"/>
-    <circle cx="125" cy="155" r="3.5" fill="#fff" opacity="0.4"/>
-  </svg>
-</div>
-
-<div class="header">
-  <h1>NEURO-MESH Client</h1>
-  <p>Frontend Demo &middot; Interacting with the Fault-Tolerant API Gateway</p>
-</div>
-
-<div class="panel">
-  <h2>Request User Data</h2>
-  <button class="btn" id="fetchBtn" onclick="fetchUserData()">Fetch User Data</button>
-  <div class="response-box" id="responseBox"></div>
-</div>
-
-<div class="history">
-  <h3>Request History</h3>
-  <ul class="history-list" id="historyList"></ul>
-</div>
-
-<!-- System Insights & Model Chat -->
-<div class="panel" style="margin-top:2rem;">
-  <h2>System Insights &amp; Model Chat</h2>
-  <p style="color:#777;font-size:0.82rem;margin-bottom:1rem;">
-    Chat with the ML model &mdash; enter metrics and see live failure predictions.
-  </p>
-  <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem;">
-    <input type="number" id="ml-latency" placeholder="Latency P95 (ms)" value="400" step="10"
-      style="flex:1;min-width:120px;background:#0d0d1a;border:1px solid #333;border-radius:6px;padding:0.6rem;color:#e0e0e0;font-size:0.85rem;">
-    <input type="number" id="ml-error" placeholder="Error Rate (0-1)" value="0.3" step="0.01" min="0" max="1"
-      style="flex:1;min-width:120px;background:#0d0d1a;border:1px solid #333;border-radius:6px;padding:0.6rem;color:#e0e0e0;font-size:0.85rem;">
-    <input type="number" id="ml-rps" placeholder="Requests/min" value="2000" step="50"
-      style="flex:1;min-width:120px;background:#0d0d1a;border:1px solid #333;border-radius:6px;padding:0.6rem;color:#e0e0e0;font-size:0.85rem;">
+<!-- HERO SECTION -->
+<section class="hero-bg relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(109,40,217,0.15),transparent_60%)]"></div>
+  <div class="relative z-10 max-w-5xl mx-auto px-6 py-20 text-center">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass mb-6">
+      <span class="w-2 h-2 rounded-full bg-teal animate-pulse"></span>
+      <span class="text-xs text-slate-400 font-medium tracking-wide">System Online — All Services Healthy</span>
+    </div>
+    <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight">
+      <span class="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">WELCOME TO</span><br>
+      <span class="bg-gradient-to-r from-violet-400 to-teal bg-clip-text text-transparent">NEURO-MESH</span>
+    </h1>
+    <p class="mt-4 text-slate-400 text-lg max-w-xl mx-auto leading-relaxed">
+      An intelligent fault-tolerant API gateway with predictive ML failover, custom Trie routing, and real-time traffic analytics.
+    </p>
+    <div class="mt-8 flex justify-center gap-4 flex-wrap">
+      <div class="glass rounded-xl px-5 py-3 text-center">
+        <i class="fa-solid fa-diagram-project text-teal text-lg mb-1"></i>
+        <p class="text-xs text-slate-400">Custom Trie</p>
+        <p class="text-sm font-semibold text-white">O(log n) Routing</p>
+      </div>
+      <div class="glass rounded-xl px-5 py-3 text-center">
+        <i class="fa-solid fa-brain text-violet-400 text-lg mb-1"></i>
+        <p class="text-xs text-slate-400">Random Forest</p>
+        <p class="text-sm font-semibold text-white">ML Prediction</p>
+      </div>
+      <div class="glass rounded-xl px-5 py-3 text-center">
+        <i class="fa-solid fa-server text-teal text-lg mb-1"></i>
+        <p class="text-xs text-slate-400">HashMap</p>
+        <p class="text-sm font-semibold text-white">O(1) Lookups</p>
+      </div>
+    </div>
   </div>
-  <button class="btn" onclick="chatWithModel()">Ask ML Model</button>
-  <div class="response-box" id="mlResponseBox"></div>
+</section>
 
-  <h2 style="margin-top:1.5rem;">Live DSA Structures</h2>
-  <button class="btn" onclick="viewDSA()">View Trie &amp; HashMap</button>
-  <div class="response-box" id="dsaBox"></div>
+<!-- NAVIGATION TABS -->
+<nav class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50">
+  <div class="max-w-5xl mx-auto px-6 flex gap-1">
+    <button onclick="switchTab('dsa')" id="tab-dsa" class="relative px-5 py-3.5 text-sm font-medium text-white">
+      <i class="fa-solid fa-sitemap mr-1.5 text-teal"></i>DSA Visualizer
+      <div class="tab-active-bar absolute bottom-0 left-0 right-0 rounded-full" id="bar-dsa"></div>
+    </button>
+    <button onclick="switchTab('chat')" id="tab-chat" class="relative px-5 py-3.5 text-sm font-medium text-slate-500 hover:text-slate-300 transition">
+      <i class="fa-solid fa-robot mr-1.5"></i>Neuro Chat
+      <div class="tab-active-bar absolute bottom-0 left-0 right-0 rounded-full hidden" id="bar-chat"></div>
+    </button>
+    <button onclick="switchTab('network')" id="tab-network" class="relative px-5 py-3.5 text-sm font-medium text-slate-500 hover:text-slate-300 transition">
+      <i class="fa-solid fa-network-wired mr-1.5"></i>Network Traffic
+      <div class="tab-active-bar absolute bottom-0 left-0 right-0 rounded-full hidden" id="bar-network"></div>
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="max-w-5xl mx-auto px-6 py-8">
+
+<!-- TAB 1: DSA VISUALIZER -->
+<div id="panel-dsa" class="fade-in">
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <!-- Server Health Cards -->
+    <div class="lg:col-span-2 space-y-4">
+      <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2"><i class="fa-solid fa-database mr-1 text-teal"></i> State Manager (HashMap)</h3>
+      <div id="server-cards" class="space-y-3"></div>
+    </div>
+    <!-- Route Map -->
+    <div class="lg:col-span-3">
+      <h3 class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2"><i class="fa-solid fa-route mr-1 text-violet-400"></i> Trie Route Map</h3>
+      <div class="glass-strong rounded-2xl p-5 max-h-[520px] overflow-y-auto">
+        <div id="route-map" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="footer">
-  <p>NEURO-MESH Phase 1 &middot; Muhammad Dayan</p>
-  <p style="margin-top:0.3rem;">Powered by <span class="brand">Xiomics Systems</span></p>
+<!-- TAB 2: NEURO CHAT -->
+<div id="panel-chat" class="hidden fade-in">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+    <!-- Sliders Panel -->
+    <div class="glass-strong rounded-2xl p-6 space-y-6">
+      <h4 class="text-xs font-semibold uppercase tracking-widest text-slate-500"><i class="fa-solid fa-sliders mr-1 text-teal"></i> Input Metrics</h4>
+      <div>
+        <label class="flex justify-between text-xs text-slate-400 mb-1"><span>Latency P95</span><span id="val-latency" class="text-white font-semibold">200ms</span></label>
+        <input type="range" min="50" max="800" value="200" class="slider" id="sl-latency" oninput="document.getElementById('val-latency').textContent=this.value+'ms'">
+      </div>
+      <div>
+        <label class="flex justify-between text-xs text-slate-400 mb-1"><span>Error Rate</span><span id="val-error" class="text-white font-semibold">5%</span></label>
+        <input type="range" min="0" max="100" value="5" class="slider" id="sl-error" oninput="document.getElementById('val-error').textContent=this.value+'%'">
+      </div>
+      <div>
+        <label class="flex justify-between text-xs text-slate-400 mb-1"><span>Traffic (req/min)</span><span id="val-rps" class="text-white font-semibold">500</span></label>
+        <input type="range" min="100" max="5000" value="500" step="50" class="slider" id="sl-rps" oninput="document.getElementById('val-rps').textContent=this.value">
+      </div>
+      <button onclick="analyzeHealth()" class="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-teal font-semibold text-sm text-white hover:opacity-90 transition shadow-lg shadow-violet-900/30">
+        <i class="fa-solid fa-bolt mr-1"></i> Analyze
+      </button>
+    </div>
+    <!-- Chat Window -->
+    <div class="lg:col-span-2 glass-strong rounded-2xl p-6 flex flex-col">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-teal flex items-center justify-center">
+          <i class="fa-solid fa-brain text-white text-xs"></i>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-white">Neuro-Mesh AI</p>
+          <p class="text-[10px] text-slate-500">Predictive Failure Engine · Random Forest</p>
+        </div>
+      </div>
+      <div id="chat-messages" class="flex-1 space-y-3 overflow-y-auto max-h-[380px] pr-2 mb-4">
+        <div class="bg-slate-800/50 rounded-xl rounded-tl-sm p-3 text-sm text-slate-300 max-w-[85%]">
+          Hello! I'm <strong class="text-violet-400">Neuro-Mesh AI</strong>. I predict server failures <em>before</em> they happen. Adjust the sliders and hit <strong class="text-teal">Analyze</strong> to see my prediction.
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="toast-container" id="toastContainer"></div>
+<!-- TAB 3: NETWORK TRAFFIC -->
+<div id="panel-network" class="hidden fade-in">
+  <div class="glass-strong rounded-2xl p-6">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h3 class="text-sm font-semibold text-white"><i class="fa-solid fa-chart-line mr-1.5 text-teal"></i> Real-Time Traffic Monitor</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Last 50 captured packets — refreshes on demand</p>
+      </div>
+      <button onclick="loadNetworkLogs()" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300 hover:border-teal hover:text-white transition">
+        <i class="fa-solid fa-arrows-rotate mr-1"></i>Refresh
+      </button>
+    </div>
+    <div class="overflow-x-auto rounded-xl border border-slate-800">
+      <table class="w-full text-xs">
+        <thead class="bg-slate-900/80">
+          <tr class="text-slate-500 uppercase tracking-wider">
+            <th class="text-left py-2.5 px-3 font-medium">Time</th>
+            <th class="text-left py-2.5 px-3 font-medium">Source</th>
+            <th class="text-left py-2.5 px-3 font-medium">Destination</th>
+            <th class="text-left py-2.5 px-3 font-medium">Protocol</th>
+            <th class="text-left py-2.5 px-3 font-medium">Length</th>
+            <th class="text-left py-2.5 px-3 font-medium">Info</th>
+          </tr>
+        </thead>
+        <tbody id="network-tbody" class="text-slate-300 divide-y divide-slate-800/50"></tbody>
+      </table>
+    </div>
+    <div id="network-empty" class="text-center py-12 text-slate-600">
+      <i class="fa-solid fa-satellite-dish text-3xl mb-3 block text-slate-700"></i>
+      <p class="text-sm">No traffic captured yet.</p>
+      <p class="text-xs text-slate-700 mt-1">Send requests via <code class="text-teal">/proxy/...</code> to populate this view.</p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="border-t border-slate-800/50 mt-12 py-6 text-center">
+  <p class="text-xs text-slate-600">
+    Powered by
+    <a href="https://xiomics.systems" target="_blank" rel="noopener"
+       class="text-violet-400 font-semibold hover:text-teal transition-colors duration-300">
+      Xiomics Systems
+    </a>
+  </p>
+</footer>
 
 <script>
-// All URLs are RELATIVE — works on localhost and Vercel
-async function fetchUserData() {
-  const btn = document.getElementById('fetchBtn');
-  const box = document.getElementById('responseBox');
-  btn.disabled = true;
-  btn.textContent = 'Fetching...';
+// --- Tab Switching ---
+function switchTab(tab) {
+  ['dsa','chat','network'].forEach(t => {
+    document.getElementById('panel-'+t).classList.add('hidden');
+    document.getElementById('tab-'+t).classList.remove('text-white');
+    document.getElementById('tab-'+t).classList.add('text-slate-500');
+    document.getElementById('bar-'+t).classList.add('hidden');
+  });
+  document.getElementById('panel-'+tab).classList.remove('hidden');
+  document.getElementById('tab-'+tab).classList.add('text-white');
+  document.getElementById('tab-'+tab).classList.remove('text-slate-500');
+  document.getElementById('bar-'+tab).classList.remove('hidden');
+  if (tab==='dsa') loadDSA();
+  if (tab==='network') loadNetworkLogs();
+}
 
+// --- DSA Visualizer ---
+async function loadDSA() {
   try {
-    const resp = await fetch('/proxy/api/v1/users', { method: 'POST' });
-    const data = await resp.json();
-    box.textContent = JSON.stringify(data, null, 2);
-    box.classList.add('visible');
-
-    if (resp.status === 200) {
-      const decision = data.routing_decision || '';
-      if (decision.toLowerCase().includes('fallback') || data.server === 'fallback') {
-        showToast('fallback', '⚠️ Primary Failed! Seamlessly fetched from Fallback API');
-        addHistory('orange', 'Routed to Fallback (failover)');
-      } else {
-        showToast('primary', '✓ Data fetched from Primary API');
-        addHistory('green', 'Routed to Primary (healthy)');
-      }
-    } else if (resp.status === 503) {
-      showToast('error', '✗ All servers down! No data available');
-      addHistory('red', '503 — No healthy servers');
-    } else {
-      showToast('error', '✗ Error ' + resp.status + ': ' + (data.error || 'Unknown'));
-      addHistory('red', 'Error ' + resp.status);
-    }
-  } catch (err) {
-    box.textContent = 'Connection failed: ' + err.message;
-    box.classList.add('visible');
-    showToast('error', '✗ Cannot reach gateway — is the server running?');
-    addHistory('red', 'Connection failed');
-  }
-  btn.disabled = false;
-  btn.textContent = 'Fetch User Data';
+    const r = await fetch('/dsa-state');
+    const d = await r.json();
+    renderServers(d.hashmap.servers);
+    renderRouteMap(d.trie);
+  } catch(e) { console.error(e); }
 }
 
-function showToast(type, message) {
-  const container = document.getElementById('toastContainer');
-  const toast = document.createElement('div');
-  toast.className = 'toast toast-' + type;
-  const icons = { primary: '✓', fallback: '⚠️', error: '✗' };
-  toast.innerHTML = '<span class="icon">' + (icons[type]||'•') + '</span><span>' + message + '</span>';
-  container.appendChild(toast);
-  setTimeout(function(){ toast.remove(); }, 4000);
-}
-
-function addHistory(color, text) {
-  const list = document.getElementById('historyList');
-  const li = document.createElement('li');
-  li.className = 'history-item';
-  const now = new Date().toLocaleTimeString();
-  li.innerHTML = '<span class="dot dot-' + color + '"></span><span>' + text + '</span><span class="time">' + now + '</span>';
-  list.prepend(li);
-  while (list.children.length > 10) list.removeChild(list.lastChild);
-}
-
-async function chatWithModel() {
-  const box = document.getElementById('mlResponseBox');
-  const latency = parseFloat(document.getElementById('ml-latency').value);
-  const errorRate = parseFloat(document.getElementById('ml-error').value);
-  const rps = parseFloat(document.getElementById('ml-rps').value);
-  box.classList.add('visible');
-  box.textContent = 'Asking model...';
-
-  try {
-    const resp = await fetch('/predict-health', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({rolling_latency_p95: latency, error_rate_1min: errorRate, requests_per_minute: rps})
-    });
-    const data = await resp.json();
-    if (data.prediction) {
-      const color = data.failure_predicted ? '#ff4444' : '#00ff88';
-      box.innerHTML = '<span style="color:' + color + ';font-weight:bold;font-size:1.1rem;">' + data.prediction + '</span>\n\n'
-        + 'Confidence:\n  Survive: ' + (data.confidence.survive_probability * 100).toFixed(1) + '%\n'
-        + '  Fail:    ' + (data.confidence.fail_probability * 100).toFixed(1) + '%\n\n'
-        + 'Model: ' + data.model + '\nInput: latency=' + latency + 'ms, error_rate=' + errorRate + ', rps=' + rps;
-    } else {
-      box.textContent = 'Model unavailable: ' + (data.error || 'Run train_mock_model.py first');
-    }
-  } catch(e) {
-    box.textContent = 'Error: ' + e.message;
+function renderServers(servers) {
+  const c = document.getElementById('server-cards');
+  c.innerHTML = '';
+  for (const [id, info] of Object.entries(servers)) {
+    const alive = info.status === 'Alive';
+    c.innerHTML += `
+      <div class="glass-strong rounded-xl p-4 ${alive ? 'border-teal/30' : 'border-red-500/30'} border transition-all">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg ${alive ? 'bg-teal/10' : 'bg-red-500/10'} flex items-center justify-center">
+              <i class="fa-solid fa-server ${alive ? 'text-teal' : 'text-red-400'}"></i>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-white">${id.charAt(0).toUpperCase()+id.slice(1)} Server</p>
+              <p class="text-[10px] text-slate-500 font-mono">${info.address}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="badge ${alive ? 'bg-teal/20 text-teal' : 'bg-red-500/20 text-red-400'}">
+              <i class="fa-solid ${alive ? 'fa-circle-check' : 'fa-circle-xmark'} mr-0.5"></i>${info.status}
+            </span>
+            <div class="w-2.5 h-2.5 rounded-full ${alive ? 'bg-teal pulse-ring' : 'bg-red-500 animate-pulse'}"></div>
+          </div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-slate-800/50 flex justify-between text-[10px] text-slate-500">
+          <span>Lookup: O(1)</span><span>Data Structure: HashMap</span>
+        </div>
+      </div>`;
   }
 }
 
-async function viewDSA() {
-  const box = document.getElementById('dsaBox');
-  box.classList.add('visible');
-  box.textContent = 'Loading...';
-  try {
-    const resp = await fetch('/dsa-state');
-    const data = await resp.json();
-    box.textContent = JSON.stringify(data, null, 2);
-  } catch(e) {
-    box.textContent = 'Error: ' + e.message;
-  }
+function renderRouteMap(trie) {
+  const c = document.getElementById('route-map');
+  c.innerHTML = trie.registered_routes.map((route, i) => {
+    const [path, service] = route.split(' → ');
+    const isDynamic = path.includes('{');
+    return `<div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-800/30 transition group">
+      <span class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold ${isDynamic ? 'bg-amber-500/10 text-amber-400' : 'bg-teal/10 text-teal'}">${i+1}</span>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-mono text-slate-300 truncate">${path}</p>
+      </div>
+      <i class="fa-solid fa-arrow-right text-[8px] text-slate-600 group-hover:text-teal transition"></i>
+      <span class="badge bg-violet-500/10 text-violet-400">${service}</span>
+      <span class="badge ${isDynamic ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-700 text-slate-400'}">${isDynamic ? 'Dynamic' : 'Static'}</span>
+    </div>`;
+  }).join('');
 }
+
+// --- Neuro Chat ---
+function analyzeHealth() {
+  const latency = parseInt(document.getElementById('sl-latency').value);
+  const errorRate = parseInt(document.getElementById('sl-error').value) / 100;
+  const rps = parseInt(document.getElementById('sl-rps').value);
+  const msgs = document.getElementById('chat-messages');
+
+  msgs.innerHTML += `<div class="bg-teal/5 border border-teal/20 rounded-xl rounded-tr-sm p-3 text-sm text-slate-300 ml-auto max-w-[80%]">
+    Analyze: Latency <strong>${latency}ms</strong>, Error Rate <strong>${(errorRate*100).toFixed(0)}%</strong>, Traffic <strong>${rps} req/min</strong>
+  </div>`;
+
+  fetch('/predict-health', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({rolling_latency_p95: latency, error_rate_1min: errorRate, requests_per_minute: rps})
+  }).then(r=>r.json()).then(data => {
+    const fail = data.failure_predicted;
+    const conf = (data.confidence ? (fail ? data.confidence.fail_probability : data.confidence.survive_probability) * 100 : 0).toFixed(1);
+    msgs.innerHTML += `<div class="bg-slate-800/50 rounded-xl rounded-tl-sm p-3 text-sm max-w-[85%] fade-in">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-teal flex items-center justify-center"><i class="fa-solid fa-brain text-[8px] text-white"></i></span>
+        <span class="text-[10px] text-slate-500 font-medium">NEURO-MESH AI</span>
+      </div>
+      ${fail
+        ? `<p class="text-red-400 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Warning! Failure Predicted</p>
+           <p class="text-xs text-slate-400 mt-1">Based on latency of <strong>${latency}ms</strong> and error rate of <strong>${(errorRate*100).toFixed(0)}%</strong>, I predict the primary server will crash. <span class="text-teal font-semibold">Rerouting to fallback...</span></p>`
+        : `<p class="text-teal font-semibold"><i class="fa-solid fa-shield-check mr-1"></i>All Clear — Server Will Survive</p>
+           <p class="text-xs text-slate-400 mt-1">Current metrics are within safe operating range. No failover needed.</p>`}
+      <p class="text-[10px] text-slate-600 mt-2">Confidence: ${conf}% · Model: RandomForest (100 trees)</p>
+    </div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }).catch(e => {
+    msgs.innerHTML += `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-xs text-red-400 max-w-[85%]"><i class="fa-solid fa-circle-exclamation mr-1"></i>Connection error. Ensure the server is running.</div>`;
+  });
+}
+
+// --- Network Traffic ---
+async function loadNetworkLogs() {
+  try {
+    const r = await fetch('/network-logs');
+    const d = await r.json();
+    const tbody = document.getElementById('network-tbody');
+    const empty = document.getElementById('network-empty');
+    if (!d.logs || d.logs.length === 0) { empty.classList.remove('hidden'); tbody.innerHTML=''; return; }
+    empty.classList.add('hidden');
+    tbody.innerHTML = d.logs.map(l => {
+      const isOk = l.status === 200;
+      return `<tr class="hover:bg-slate-800/30 transition">
+        <td class="py-2 px-3 text-slate-500 font-mono">${l.time}</td>
+        <td class="py-2 px-3 font-mono">${l.source_ip}</td>
+        <td class="py-2 px-3 font-mono">${l.dest_ip}</td>
+        <td class="py-2 px-3"><span class="badge ${l.protocol==='HTTP/1.1'?'bg-teal/10 text-teal':'bg-amber-500/10 text-amber-400'}">${l.protocol}</span></td>
+        <td class="py-2 px-3 text-slate-400">${l.length} B</td>
+        <td class="py-2 px-3 text-slate-400 truncate max-w-[200px]"><span class="badge mr-1 ${isOk?'bg-green-500/10 text-green-400':'bg-red-500/10 text-red-400'}">${l.status}</span>${l.info}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+
+// Init
+loadDSA();
+setInterval(loadDSA, 5000);
 </script>
 </body>
 </html>
